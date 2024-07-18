@@ -1,9 +1,12 @@
 ## SpotifyDL Chrome Extension
 
 ### Description
-The Spotify Music Downloader Chrome Extension allows users to download tracks from their Spotify playlists directly to their device using their Spotify account (premium or free). By analyzing the current Spotify page, the extension extracts the track information, retrieves complete metadata (including album cover, artist, and album info), and downloads the files directly from Spotify's servers.
+Allows users to download Spotify playlist tracks from the browser.
 
-**Note: Currently, downloads are limited to 128kbps quality (Spotify Free quality) due to the lack of a Spotify Premium account for development and testing. Higher quality downloads will be supported in future updates.**
+- Using Widevine CDM: Implements Widevine's Content Decryption Module (CDM) to obtain track decryption keys.
+- Integrated decryption of the protected file and addition of MP4 metadata with FFmpeg WASM.
+
+**Note: Currently, downloads are in 128kbps quality (Spotify Free quality) due to the absence of a Spotify Premium account for development and testing. Higher quality downloads will be supported in future updates.**
 
 ![img1](img1.png)
 
@@ -37,11 +40,11 @@ The Spotify Music Downloader Chrome Extension allows users to download tracks fr
    - Click on "Load unpacked" and select the directory where the extension files are located (`dist` folder).
 
 ### Usage
-1. Log in to your Spotify account (premium or free) on the Spotify web player.
+1. Log in to your Spotify account on the Spotify web player.
 2. Navigate to a playlist you want to download.
-3. Click on the Spotify Music Downloader extension icon in the Chrome toolbar.
+3. Click on the SpotifyDL extension icon in the Chrome toolbar.
 4. The extension will analyze the current page and display the list of tracks available for download.
-5. Select the tracks you want to download and click the "Download" button.
+5. Select the tracks you want to download and click.
 6. The selected tracks will be downloaded to your device with complete metadata.
 
 
