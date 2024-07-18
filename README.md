@@ -16,8 +16,8 @@ The Spotify Music Downloader Chrome Extension allows users to download tracks fr
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/cycyrild/SpotifyDl.git
-   cd spotifyDl
+   git clone https://github.com/cycyrild/SpotifyDL.git
+   cd SpotifyDL
    ```
 
 2. Install the dependencies:
