@@ -1,0 +1,104 @@
+body {
+    margin: 0 5px;
+
+    --main-color: rgb(166, 209, 223);
+    --top-color: rgb(142, 172, 182);
+    --bottom-color: rgb(141, 187, 137);
+    --top-height: clamp(45px, 8vh, 75px);
+
+    --bottom-height: clamp(65px, 11vh, 115px);
+
+    background-color: var(--main-color);
+
+    margin-top: var(--top-height);
+    margin-bottom: var(--bottom-height);
+    font-family: 'Oswald', sans-serif;
+
+    width: 450px;
+}
+
+.ui-bar {
+    z-index: 2;
+}
+
+.top {
+    --margin: 10px;
+    --shadown-size: calc(var(--margin) / 2);
+    --real-height: calc(var(--top-height) - var(--margin));
+
+    position: fixed;
+    height: var(--real-height);
+    inset: 0;
+    width: 100%;
+    background-color: var(--top-color);
+    border-radius: 0px 0 200px 200px;
+    box-shadow: 0 0 var(--shadown-size) var(--shadown-size) rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+}
+
+h1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(25px, 3.75vw, 45px);
+    margin: 0;
+    max-width: 75%;
+}
+
+
+.middle {
+    background-color: var(--main-color);
+}
+
+.tracks {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+
+
+.bottom {
+    --bg-1: rgb(0 128 0 / 25%);
+    --bg-2: rgba(128, 75, 0, 0.35);
+
+    --margin: 10px;
+    --real-bottom-height: calc(var(--bottom-height) - var(--margin));
+
+    --btn-height: calc(var(--real-bottom-height) - var(--margin));
+
+    position: fixed;
+    bottom: var(--margin);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bottom-color);
+    border-radius: 200px;
+    width: 75%;
+    height: var(--btn-height);
+    box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, 0.5);
+
+    overflow: hidden;
+}
+
+.progress {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color);
+    transform: translateX(calc(-100% + var(--progress)));
+    transition: transform ease 150ms;
+    z-index: -1;
+}
+
+.bottom-section {
+    width: 90%;
+    height: 100%;
+    transform: translateX(-50%);
+    left: 50%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3vw;
+}

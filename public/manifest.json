@@ -1,0 +1,40 @@
+{
+    "name": "SpotifyDL",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "cookies",
+        "activeTab",
+        "downloads"
+    ],
+    "host_permissions": [
+        "https://*.spotify.com/*",
+        "https://*.scdn.co/*"
+
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "injectutils.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    },
+    "icons": {
+      "16": "16.png",
+      "32": "32.png",
+      "48": "48.png",
+      "128": "128.png"
+    }
+}
