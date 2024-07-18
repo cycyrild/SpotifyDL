@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Downloader from '../downloader';
 import { SpotifyAuth } from '../spotifyauth';
-import * as InjectHelpers from '../utils/injectHelpers';
 import * as Helpers from '../utils/helpers';
 import { UIUpdateCallback } from '../utils/downloadManager';
 import SpotifyAPI from "../spotify-api/spotify-api"
@@ -57,13 +56,14 @@ const useSpotifyData = () => {
                 }
 
                 downloaderRef.current = new Downloader(downloadState);
-                await downloaderRef.current.Load();
+                const downloaderLoadTask = downloaderRef.current.Load();
 
                 const token = await SpotifyAuth.getAccessToken(cookie);
                 setSpotifyAccessToken(token);
 
                 const playlistTracks = await SpotifyAPI.getAllTracksFromPlaylist(playlistId, token);
 
+                await downloaderLoadTask;
                 setTracks(playlistTracks[0]);
                 setTracksTitle(playlistTracks[1]);
                 setLoading(false);
