@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Downloader from '../downloader';
 import { SpotifyAuth } from '../spotifyauth';
 import * as Helpers from '../utils/helpers';
-import { UIUpdateCallback } from '../utils/downloadManager';
+import { UIUpdateCallback, FileProgressStateImpl } from '../utils/downloadManager';
 import SpotifyAPI from "../spotify-api/spotify-api"
 import { SpotifyPlaylist, SpotifyTrack } from "../spotify-api/spotifyPlaylist";
 
@@ -14,7 +14,7 @@ const useSpotifyData = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [overallProgress, setOverallProgress] = useState<number>(100);
     const [remainingItems, setRemainingItems] = useState<number>(0);
-    const [progressDetails, setProgressDetails] = useState<{ [id: string]: number }>({});
+    const [progressDetails, setProgressDetails] = useState<{ [id: string]: FileProgressStateImpl }>({});
     const [error, setError] = useState(null);
 
     const downloadState: UIUpdateCallback = (overallProgress, remainingItems, progressDetails) => {

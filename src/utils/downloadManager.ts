@@ -1,19 +1,23 @@
-export type UIUpdateCallback = (overallProgress: number, remainingItems: number, progressDetails: { [id: string]: number }) => void;
+export type UIUpdateCallback = (overallProgress: number, remainingItems: number, progressStates: { [id: string]: FileProgressStateImpl }) => void;
 import { ProgressCallback } from "./helpers";
 
 interface FileProgressState {
     downloadProgress: number;
     decrypted: boolean;
     saved: boolean;
-    calculateProgress(): number;
+    progress(): number;
 }
 
-class FileProgressStateImpl implements FileProgressState {
+export class FileProgressStateImpl implements FileProgressState {
     downloadProgress: number = 0;
     decrypted: boolean = false;
     saved: boolean = false;
 
-    calculateProgress(): number {
+    percentageProgress(): string {
+        return (this.progress() * 100).toFixed(2);
+    }
+
+    progress(): number {
         let fileProgress = 0;
         fileProgress += (this.downloadProgress / 100) * (2 / 3);
         if (this.decrypted) fileProgress += 1 / 6;
@@ -64,17 +68,12 @@ export class TrackDownloadManager {
     };
 
     private reportGlobalProgress() {
-        const progressDetails: { [id: string]: number } = {};
-        const totalProgress = Object.keys(this.progressStates).reduce((sum, id) => {
-            const progress = this.progressStates[id].calculateProgress();
-            progressDetails[id] = progress;
-            return sum + progress;
-        }, 0);
+        const totalProgress = Object.values(this.progressStates).reduce((sum, state) => sum + state.progress(), 0);
 
         const totalCount = Object.keys(this.progressStates).length;
         const overallProgress = totalCount > 0 ? (totalProgress / totalCount * 100).toFixed(2) : '0.00';
         const remainingItems = totalCount - Object.values(this.progressStates).filter(state => state.complete()).length;
 
-        this.uiUpdateCallback(parseFloat(overallProgress), remainingItems, progressDetails);
+        this.uiUpdateCallback(parseFloat(overallProgress), remainingItems, this.progressStates);
     }
 }

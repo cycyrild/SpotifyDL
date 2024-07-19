@@ -4,6 +4,8 @@ import useSpotifyData from '../hooks/useSpotifyData';
 import * as Helpers from '../utils/helpers';
 import { SpotifyTrack } from '../spotify-api/spotifyPlaylist';
 import './App.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
   const { tracks, tracksTitle, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
@@ -38,7 +40,13 @@ const App: React.FC = () => {
 
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <FontAwesomeIcon
+        icon={faCircleNotch}
+        size="6x"
+        className="center-icon spin"
+      />
+    )
   }
 
   if (error) {
