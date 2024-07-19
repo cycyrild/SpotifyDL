@@ -50,25 +50,20 @@ const useSpotifyData = () => {
                     throw new Error("No Spotify playlists detected on this page.")
                 }
 
-                let cookie = await SpotifyAuth.getSpotifyCookie();
-                if (!cookie) {
-                    throw new Error('No Spotify login cookies detected. Please log in.');
-                }
-
                 downloaderRef.current = new Downloader(downloadState);
                 const downloaderLoadTask = downloaderRef.current.Load();
 
-                const token = await SpotifyAuth.getAccessToken(cookie);
-                setSpotifyAccessToken(token);
+                const token = await SpotifyAuth.getAccessToken();
+                setSpotifyAccessToken(token.accessToken);
 
-                const playlistTracks = await SpotifyAPI.getAllTracksFromPlaylist(playlistId, token);
+                const playlistTracks = await SpotifyAPI.getAllTracksFromPlaylist(playlistId, token.accessToken);
 
                 await downloaderLoadTask;
                 setTracks(playlistTracks[0]);
                 setTracksTitle(playlistTracks[1]);
                 setLoading(false);
             } catch (error) {
-                console.error(error);
+                console.log(error.message);
                 setError(error.message);
                 setLoading(false);
             }

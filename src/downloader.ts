@@ -105,8 +105,8 @@ class Downloader {
 
   async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: string, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
-    trackIds.forEach(x => {
-      this.trackDownloadManager.initializeFile(x);
+    trackIds.forEach(id => {
+      this.trackDownloadManager.initializeFile(id);
     });
 
     const downloadPromises: Promise<any>[] = [];

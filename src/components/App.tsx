@@ -7,11 +7,11 @@ import './App.css'
 
 const App: React.FC = () => {
   const { tracks, tracksTitle, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
-  const bottomStyles = {"--progress": `${overallProgress}%`, "--bg-color": remainingItems == 0 ? "var(--bg-1)": "var(--bg-2)"} as React.CSSProperties;
+  const bottomStyles = { "--progress": `${overallProgress}%`, "--bg-color": remainingItems == 0 ? "var(--bg-1)" : "var(--bg-2)" } as React.CSSProperties;
 
   const trackDownload = async (track: SpotifyTrack) => {
-    
-    if((track.id in progressDetails))
+
+    if ((track.id in progressDetails))
       return;
 
     if (spotifyAccessToken && downloaderRef.current) {
@@ -24,7 +24,7 @@ const App: React.FC = () => {
   }
 
   const downloadAll = async () => {
-    if(remainingItems !=0)
+    if (remainingItems != 0)
       return;
     if (spotifyAccessToken && downloaderRef.current) {
       await downloaderRef.current.DownloadTrackAndDecrypt(new Set(tracks.map(x => x.id)), spotifyAccessToken, "MP4_128_DUAL", (file) => {
@@ -41,7 +41,7 @@ const App: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  if(error) {
+  if (error) {
     return <div>{error}</div>
   }
 
@@ -62,9 +62,9 @@ const App: React.FC = () => {
       </div>
 
       <div className="bottom ui-bar" style={bottomStyles} onClick={downloadAll}>
-        
+
         <div className="bottom-section">
-          {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}`: `DOWNLOAD ALL`}
+          {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}` : `DOWNLOAD ALL`}
         </div>
         <div className="progress"></div>
       </div>

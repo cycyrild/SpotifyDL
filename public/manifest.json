@@ -11,7 +11,8 @@
     "permissions": [
         "cookies",
         "activeTab",
-        "downloads"
+        "downloads",
+        "storage"
     ],
     "host_permissions": [
         "https://*.spotify.com/*",

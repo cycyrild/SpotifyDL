@@ -79,6 +79,8 @@ h1 {
     box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, 0.5);
 
     overflow: hidden;
+
+    cursor: pointer;
 }
 
 .progress {
