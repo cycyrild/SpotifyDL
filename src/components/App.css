@@ -4,17 +4,15 @@ body {
     --main-color: rgb(166, 209, 223);
     --top-color: rgb(142, 172, 182);
     --bottom-color: rgb(141, 187, 137);
-    --top-height: clamp(45px, 8vh, 75px);
 
-    --bottom-height: clamp(65px, 11vh, 115px);
+    --top-height: 50px;
+    --bottom-height: 70px;
 
     background-color: var(--main-color);
 
     margin-top: var(--top-height);
     margin-bottom: var(--bottom-height);
     font-family: 'Oswald', sans-serif;
-
-    width: 450px;
 }
 
 .ui-bar {
@@ -35,13 +33,14 @@ body {
     box-shadow: 0 0 var(--shadown-size) var(--shadown-size) rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 h1 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: clamp(25px, 3.75vw, 45px);
+    font-size: calc(0.7 * var(--real-height));
     margin: 0;
     max-width: 75%;
 }
@@ -102,7 +101,7 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 3vw;
+    font-size: 20px;
 }
 
 .center-icon {

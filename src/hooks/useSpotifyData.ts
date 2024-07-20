@@ -32,14 +32,20 @@ const useSpotifyData = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+
+                const params = new URLSearchParams(window.location.search);
+                const url = params.get('url');
+                if (!url) {
+                    throw new Error("Unable to retrieve current URL.");
+                }
+                /*const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
                 const currentTab = tabs[0];
 
                 if (!currentTab.url) {
                     throw new Error("Unable to retrieve current URL.");
-                }
+                }*/
 
-                const playlistId = getPlaylistIdFromUrl(currentTab.url);
+                const playlistId = getPlaylistIdFromUrl(url);
 
                 if (!playlistId) {
                     throw new Error("No Spotify playlists detected on this page.");

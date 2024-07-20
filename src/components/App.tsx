@@ -18,7 +18,7 @@ const App: React.FC = () => {
   }
 
 
-  const trackDownload = async (event: React.MouseEvent<HTMLDivElement>, track: SpotifyTrack) => {
+  const trackDownload = async (track: SpotifyTrack) => {
 
     if (progressDetails[track.id] && !progressDetails[track.id].complete()) {
       console.log('Download not completed');

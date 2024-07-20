@@ -1,13 +1,16 @@
 
 
 .track-elt {
-    --bg-default: rgb(0 0 0 / 10%);
-    --bg-complete: rgb(255 255 255 / 40%);
+    --bg-default: rgba(255, 255, 255, 20%);
+    --bg-complete: rgb(106 172 103 / 35%);
+    --bg-in-progress: rgb(255 255 255 / 60%);
+    --progress-color: rgb(0 106 255 / 45%);
+
     display: flex;
-    --track-elt-height: 9.5vw;
+    --track-elt-height: 45px;
     height: var(--track-elt-height);
     gap: 5px;
-    background-color: var(--bg);
+    background-color: var(--track-elt-bg);
     overflow: hidden;
     position: relative;
     cursor: pointer;
@@ -49,8 +52,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    background: #006aff1f;
+    background: var(--progress-color);
     z-index: -1;
     transform: translateX(calc(-100% + var(--progress)));
     transition: transform ease 150ms;
+    opacity: var(--progress-opacity);
 }
