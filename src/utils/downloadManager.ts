@@ -36,6 +36,9 @@ export class TrackDownloadManager {
     constructor(private uiUpdateCallback: UIUpdateCallback) { }
 
     public initializeFile(id: string) {
+        if (this.progressStates[id] && !this.progressStates[id].complete()) {
+            throw new Error("File initialized and not completed");
+        }
         this.progressStates[id] = new FileProgressStateImpl();
         this.reportGlobalProgress();
     }

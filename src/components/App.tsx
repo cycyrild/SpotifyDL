@@ -6,20 +6,27 @@ import { SpotifyTrack } from '../spotify-api/spotifyPlaylist';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { DownloadResult } from '../downloader';
 
 const App: React.FC = () => {
   const { tracks, tracksTitle, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
   const bottomStyles = { "--progress": `${overallProgress}%`, "--bg-color": remainingItems == 0 ? "var(--bg-1)" : "var(--bg-2)" } as React.CSSProperties;
+  const audioQuality = "MP4_128_DUAL";
 
-  const trackDownload = async (track: SpotifyTrack) => {
+  const chromeDownload = (file: DownloadResult) => {
+    Helpers.chromeDownload(file.data, file.metadata.original_title);
+  }
 
-    if ((track.id in progressDetails))
+
+  const trackDownload = async (event: React.MouseEvent<HTMLDivElement>, track: SpotifyTrack) => {
+
+    if (progressDetails[track.id] && !progressDetails[track.id].complete()) {
+      console.log('Download not completed');
       return;
+    }
 
-    if (spotifyAccessToken && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken, 'MP4_128_DUAL', (file) => {
-        Helpers.chromeDownload(file.data, file.metadata.original_title);
-      });
+    if (spotifyAccessToken.current && downloaderRef.current) {
+      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, audioQuality, chromeDownload);
     } else {
       console.error('No Spotify access token or downloader available');
     }
@@ -28,14 +35,11 @@ const App: React.FC = () => {
   const downloadAll = async () => {
     if (remainingItems != 0)
       return;
-    if (spotifyAccessToken && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set(tracks.map(x => x.id)), spotifyAccessToken, "MP4_128_DUAL", (file) => {
-        Helpers.chromeDownload(file.data, file.metadata.original_title);
-      });
+    if (spotifyAccessToken.current && downloaderRef.current) {
+      await downloaderRef.current.DownloadTrackAndDecrypt(new Set(tracks.map(x => x.id)), spotifyAccessToken.current, audioQuality, chromeDownload);
     } else {
       console.error('No Spotify access token or downloader available');
     }
-
   }
 
 

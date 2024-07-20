@@ -1,14 +1,17 @@
 
 
 .track-elt {
+    --bg-default: rgb(0 0 0 / 10%);
+    --bg-complete: rgb(255 255 255 / 40%);
     display: flex;
     --track-elt-height: 9.5vw;
     height: var(--track-elt-height);
     gap: 5px;
-    background-color: rgb(0 0 0 / 10%);
+    background-color: var(--bg);
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    transition: background-color ease 500ms;
 }
 
 .cover {
