@@ -59,12 +59,12 @@ export class SpotifyAuth {
     }
 
     public static async getSpotifyCookie(): Promise<string | null> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             chrome.cookies.get({ url: 'https://open.spotify.com', name: 'sp_dc' }, (cookie) => {
                 if (cookie) {
                     resolve(cookie.value);
                 } else {
-                    reject('Cookie not found');
+                    resolve(null);
                 }
             });
         });

@@ -17,6 +17,16 @@ const useSpotifyData = () => {
     const spotifyAccessToken = useRef<string | null>(null);
     const downloaderRef = useRef<Downloader | null>(null);
 
+    const normalizeError = (err:any) => {
+        if (err instanceof Error) {
+          return err;
+        } else if (typeof err === 'string') {
+          return new Error(err);
+        } else {
+          return new Error('Une erreur inconnue s\'est produite');
+        }
+      }
+
     const downloadState = useCallback<UIUpdateCallback>((overallProgress, remainingItems, progressDetails) => {
         setOverallProgress(overallProgress);
         setRemainingItems(remainingItems);
@@ -38,12 +48,6 @@ const useSpotifyData = () => {
                 if (!url) {
                     throw new Error("Unable to retrieve current URL.");
                 }
-                /*const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-                const currentTab = tabs[0];
-
-                if (!currentTab.url) {
-                    throw new Error("Unable to retrieve current URL.");
-                }*/
 
                 const playlistId = getPlaylistIdFromUrl(url);
 
@@ -64,8 +68,9 @@ const useSpotifyData = () => {
                 setTracksTitle(playlistTitle);
                 setLoading(false);
             } catch (error) {
-                console.error(error.message);
-                setError(error.message);
+                const normalizedError = normalizeError(error);
+                console.error(normalizedError.message);
+                setError(normalizedError.message);
                 setLoading(false);
             }
         };
