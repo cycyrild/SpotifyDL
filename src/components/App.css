@@ -5,8 +5,8 @@ body {
     --top-color: rgb(142, 172, 182);
     --bottom-color: rgb(141, 187, 137);
 
-    --top-height: 50px;
-    --bottom-height: 70px;
+    --top-height: 45px;
+    --bottom-height: 60px;
 
     background-color: var(--main-color);
 
@@ -101,7 +101,7 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 20px;
+    font-size: calc(0.4 * var(--btn-height));
 }
 
 .center-icon {
