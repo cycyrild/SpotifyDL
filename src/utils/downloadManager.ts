@@ -1,10 +1,16 @@
-export type UIUpdateCallback = (overallProgress: number, remainingItems: number, progressStates: { [id: string]: FileProgressStateImpl }) => void;
 import { ProgressCallback } from "./helpers";
+
+export type UIUpdateCallback = (
+    overallProgress: number,
+    remainingItems: number,
+    progressStates: { [id: string]: FileProgressStateImpl }
+) => void;
 
 interface FileProgressState {
     downloadProgress: number;
     decrypted: boolean;
     saved: boolean;
+    finished: boolean;
     progress(): number;
 }
 
@@ -12,6 +18,7 @@ export class FileProgressStateImpl implements FileProgressState {
     downloadProgress: number = 0;
     decrypted: boolean = false;
     saved: boolean = false;
+    finished: boolean = false;
 
     percentageProgress(): string {
         return (this.progress() * 100).toFixed(2);
@@ -26,7 +33,7 @@ export class FileProgressStateImpl implements FileProgressState {
     }
 
     complete(): boolean {
-        return this.downloadProgress == 100 && this.decrypted && this.saved;
+        return this.downloadProgress === 100 && this.decrypted && this.saved;
     }
 }
 
@@ -71,11 +78,18 @@ export class TrackDownloadManager {
     };
 
     private reportGlobalProgress() {
-        const totalProgress = Object.values(this.progressStates).reduce((sum, state) => sum + state.progress(), 0);
+        const activeStates = Object.values(this.progressStates).filter(state => !state.finished);
 
-        const totalCount = Object.keys(this.progressStates).length;
+        const totalProgress = activeStates.reduce((sum, state) => sum + state.progress(), 0);
+        const totalCount = activeStates.length;
         const overallProgress = totalCount > 0 ? (totalProgress / totalCount * 100).toFixed(2) : '0.00';
-        const remainingItems = totalCount - Object.values(this.progressStates).filter(state => state.complete()).length;
+        const remainingItems = activeStates.filter(state => !state.complete()).length;
+
+        Object.values(this.progressStates).forEach(state => {
+            if (state.complete() && !state.finished) {
+                state.finished = true;
+            }
+        });
 
         this.uiUpdateCallback(parseFloat(overallProgress), remainingItems, this.progressStates);
     }

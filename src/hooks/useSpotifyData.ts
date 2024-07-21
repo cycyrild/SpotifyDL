@@ -13,6 +13,7 @@ const useSpotifyData = () => {
     const [overallProgress, setOverallProgress] = useState<number>(100);
     const [remainingItems, setRemainingItems] = useState<number>(0);
     const [progressDetails, setProgressDetails] = useState<{ [id: string]: FileProgressStateImpl }>({});
+
     const [error, setError] = useState<string | null>(null);
     const spotifyAccessToken = useRef<string | null>(null);
     const downloaderRef = useRef<Downloader | null>(null);

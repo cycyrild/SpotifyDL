@@ -6,17 +6,24 @@ import { SpotifyTrack } from '../spotify-api/spotifyPlaylist';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+
+
 import { DownloadResult } from '../downloader';
 
 const App: React.FC = () => {
   const { tracks, tracksTitle, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
-  const bottomStyles = { "--progress": `${overallProgress}%`, "--bg-color": remainingItems == 0 ? "var(--bg-1)" : "var(--bg-2)" } as React.CSSProperties;
+
+  const bottomStyles = {
+    "--progress": `${overallProgress}%`,
+    "--bg-color": remainingItems == 0 ? "var(--bg-1)" : "var(--bg-2)"
+  } as React.CSSProperties;
+
   const audioQuality = "MP4_128_DUAL";
 
   const chromeDownload = (file: DownloadResult) => {
     Helpers.chromeDownload(file.data, file.metadata.original_title);
   }
-
 
   const trackDownload = async (track: SpotifyTrack) => {
 
@@ -54,7 +61,14 @@ const App: React.FC = () => {
   }
 
   if (error) {
-    return <div>{error}</div>
+    return (
+      <div className='error'>
+        <FontAwesomeIcon
+          icon={faCircleExclamation}
+          size="6x"
+        />
+        {error}
+      </div>)
   }
 
   return (
@@ -65,7 +79,7 @@ const App: React.FC = () => {
       <div className="top top-elt ui-bar">
         <h1>SPOTIFY DL V1</h1>
       </div>
-      <h2>{tracksTitle}</h2>
+      <h3 className='window-title'>{tracksTitle}</h3>
 
       <div className='tracks'>
         {tracks.map((track, index) => (

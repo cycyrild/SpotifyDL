@@ -1,7 +1,7 @@
 
 
-.track-elt {
-    --bg-default: rgba(255, 255, 255, 20%);
+.trackElt {
+    --bg-default: rgba(255, 255, 255, 0.2);
     --bg-complete: rgb(106 172 103 / 35%);
     --bg-in-progress: rgb(255 255 255 / 60%);
     --progress-color: rgb(0 106 255 / 45%);
@@ -23,7 +23,7 @@
     aspect-ratio: 1/1;
 }
 
-.info-track {
+.infoTrack {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -46,7 +46,7 @@
     text-overflow: ellipsis;
 }
 
-.track-elt::before {
+.trackElt::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -57,4 +57,18 @@
     transform: translateX(calc(-100% + var(--progress)));
     transition: transform ease 150ms;
     opacity: var(--progress-opacity);
+}
+
+.trackElt::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+    transition: background ease 150ms;
+
+}
+
+.trackElt:hover::after {
+    background: rgb(255 255 255 / 25%);
 }

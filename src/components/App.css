@@ -1,6 +1,6 @@
 body {
     margin: 0 5px;
-
+    --font-size: 100%;
     --main-color: rgb(166, 209, 223);
     --top-color: rgb(142, 172, 182);
     --bottom-color: rgb(141, 187, 137);
@@ -13,6 +13,8 @@ body {
     margin-top: var(--top-height);
     margin-bottom: var(--bottom-height);
     font-family: 'Oswald', sans-serif;
+
+    font-size: var(--font-size);
 }
 
 .ui-bar {
@@ -45,7 +47,6 @@ h1 {
     max-width: 75%;
 }
 
-
 .middle {
     background-color: var(--main-color);
 }
@@ -56,11 +57,14 @@ h1 {
     flex-direction: column;
 }
 
-
+.bottom:hover {
+    --box-shadow-alpha: 1;
+}
 
 .bottom {
     --bg-1: rgb(0 128 0 / 25%);
     --bg-2: rgba(128, 75, 0, 0.35);
+    --box-shadow-alpha: 0.5;
 
     --margin: 10px;
     --real-bottom-height: calc(var(--bottom-height) - var(--margin));
@@ -75,8 +79,8 @@ h1 {
     border-radius: 200px;
     width: 75%;
     height: var(--btn-height);
-    box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, 0.5);
-
+    box-shadow: inset 0 0 5px 0px rgba(0, 0, 0, var(--box-shadow-alpha));
+    transition:  box-shadow ease 150ms;
     overflow: hidden;
 
     cursor: pointer;
@@ -108,18 +112,30 @@ h1 {
     margin-left: auto;
     margin-right: auto;
     display: block;
-  }
-  
-  .spin {
+}
+
+.spin {
     animation: spin 2s linear infinite;
-  }
-  
-  @keyframes spin {
+}
+
+.error {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+}
+
+@keyframes spin {
     0% {
-      transform: rotate(0deg);
+        transform: rotate(0deg);
     }
+
     100% {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
-  }
-  
+}
+
+.window-title {
+    margin: 0;
+    margin-bottom: 10px;
+}

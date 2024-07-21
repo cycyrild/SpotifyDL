@@ -1,7 +1,8 @@
 import React from 'react';
-import './Track.css'
+import './Track.css';
 import { SpotifyPlaylist, SpotifyTrack } from "../spotify-api/spotifyPlaylist";
 import { FileProgressStateImpl } from "../utils/downloadManager"
+
 export interface TrackProps {
     track: SpotifyTrack;
     progress: FileProgressStateImpl | undefined;
@@ -15,16 +16,16 @@ const Track: React.FC<TrackProps> = ({ track, progress, onClick }) => {
 
     const trackEltStyle =
         {
-            "--progress": `${progress ? progress.percentageProgress() : 0}%`,
-            "--progress-opacity": `${progress && !progress.complete() ? 1 : 0}`,
-            "--track-elt-bg": `var(${progress ? (!progress.complete() ? "--bg-in-progress" : "--bg-complete") : "--bg-default"})`
+            "--progress": `${progress  && !progress.finished ? progress.percentageProgress() : 0}%`,
+            "--progress-opacity": `${progress && !progress.finished ? 1 : 0}`,
+            "--track-elt-bg": `var(${progress ? (!progress.finished ? "--bg-in-progress" : "--bg-complete") : "--bg-default"})`
         } as React.CSSProperties;
 
     return (
-        <div className="track-elt" onClick={async () => await onClick(track)} style={trackEltStyle}>
+        <div className="trackElt" onClick={async () => await onClick(track)} style={trackEltStyle}>
             <img loading='lazy' className="cover" src={imgSrc} />
 
-            <div className="info-track">
+            <div className="infoTrack">
                 <div className="title" >
                     {track.name}
                 </div>
