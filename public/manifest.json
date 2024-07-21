@@ -6,7 +6,7 @@
         "service_worker": "background.js"
     },
     "action": {
-        "default_title": "Click to open panel"
+        "default_title": "Click to open popup"
     },
     "permissions": [
         "cookies",
