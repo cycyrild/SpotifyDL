@@ -1,7 +1,8 @@
 import * as Base62 from "./base62";
 import { ImageSize, TrackMetadata } from "./metadata";
 import * as Helpers from "../utils/helpers"
-import { Playlist, TrackObject } from "./spotify-playlist";
+import { Playlist, TrackObject, Album, CommonFields, PlaylistTrackObject, MediaType } from "./spotify-types";
+import { TracksCommonFields } from './interfaces'
 
 class SpotifyAPI {
     static getTrackGid(trackId: string): string {
@@ -25,10 +26,9 @@ class SpotifyAPI {
         return fetch(url, mergedOptions);
     }
 
-    static async getCoverUrl(fileMetadata: TrackMetadata, imageSize: ImageSize) : Promise<string|undefined>
-    {
+    static async getCoverUrl(fileMetadata: TrackMetadata, imageSize: ImageSize): Promise<string | undefined> {
         const coverHash = fileMetadata.album.cover_group?.image?.find(x => x.size === imageSize)?.file_id;
-        if(coverHash) {
+        if (coverHash) {
             return `https://i.scdn.co/image/${coverHash}`;
         }
         return undefined;
@@ -76,79 +76,91 @@ class SpotifyAPI {
         return new Uint8Array(data);
     }
 
-    static async *getPlaylistInfo(playlistId, accessToken) {
+    static async *getMediaInfo(mediaId: string, accessToken: string, mediaType: MediaType) {
         const fetchWithToken = this.fetchWithToken;
-    
+        const url = mediaType === 'playlist' ? `https://api.spotify.com/v1/playlists/${mediaId}` : `https://api.spotify.com/v1/albums/${mediaId}`;
+
         try {
-            const firstPageReq = await fetchWithToken(`https://api.spotify.com/v1/playlists/${playlistId}`, accessToken);
-    
+            const firstPageReq = await fetchWithToken(url, accessToken);
+
             if (!firstPageReq.ok) {
-                throw new Error(`Failed to fetch playlist: ${firstPageReq.statusText}`);
+                throw new Error(`Failed to fetch ${mediaType}: ${firstPageReq.statusText}`);
             }
-    
-            const firstPage : Playlist = await firstPageReq.json();
-    
+
+            const firstPage: any = await firstPageReq.json();
+
             if (!firstPage.tracks || !firstPage.tracks.items) {
                 throw new Error("Invalid response structure");
             }
-    
-            let tracks = [...firstPage.tracks.items];
+
+            let tracks: any[] = [...firstPage.tracks.items];
             let nextPage = firstPage.tracks.next;
-    
+
             while (nextPage) {
                 const decodedNextPage = decodeURIComponent(nextPage);
                 const pageReq = await fetchWithToken(decodedNextPage, accessToken);
-    
+
                 if (!pageReq.ok) {
                     throw new Error(`Failed to fetch next page: ${pageReq.statusText}`);
                 }
-    
+
                 const parsedPage = await pageReq.json();
-    
+
                 if (!parsedPage.items) {
                     throw new Error("Invalid page response structure");
                 }
-    
+
                 tracks = [...tracks, ...parsedPage.items];
                 nextPage = parsedPage.next;
             }
-    
-            firstPage.tracks.items = tracks;
+
+            if (mediaType === 'playlist') {
+                firstPage.tracks.items = tracks.map((item: PlaylistTrackObject) => item.track) as TrackObject[];
+            } else {
+                firstPage.tracks.items = tracks as TrackObject[];
+            }
+
             yield firstPage;
         } catch (error) {
-            console.error(`Error in getPlaylistInfo: ${error.message}`);
+            console.error(`Error in getMediaInfo: ${error.message}`);
             throw error;
         }
     }
-    
 
-    static async getAllTracksFromPlaylist(playlistId: string, accessToken: string): Promise<[TrackObject[], string]> {
-        const playlistIterator = SpotifyAPI.getPlaylistInfo(playlistId, accessToken);
-        let playlistName: string | undefined = undefined;
-    
+
+
+    static async getAllTracksFromMedia(mediaId: string, accessToken: string, mediaType: MediaType): Promise<TracksCommonFields> {
+        const mediaIterator = SpotifyAPI.getMediaInfo(mediaId, accessToken, mediaType);
+        let commonFields: CommonFields | undefined;
+
         let allTracks: TrackObject[] = [];
-    
-        for await (const playlist of playlistIterator) {
-            if (!playlistName) {
-                playlistName = playlist.name;
+
+        for await (const media of mediaIterator) {
+            if (!commonFields) {
+                commonFields = media;
             }
-            const validTracks = playlist.tracks.items
-            .map(item => item.track)
-            .filter((track): track is TrackObject => track !== undefined && track !== null);
-        
-            const tracks = validTracks
-                .filter((track): track is TrackObject => track.type === 'track');
-    
-            allTracks = [...allTracks, ...tracks];
+
+            let validTracks: TrackObject[] = [];
+
+            if (mediaType === 'playlist') {
+                validTracks = (media.tracks.items as TrackObject[])
+                    .filter((track): track is TrackObject => track !== undefined && track !== null && track.type === 'track');
+            } else if (mediaType === 'album') {
+                validTracks = (media.tracks.items as TrackObject[])
+                    .filter((track): track is TrackObject => track !== undefined && track !== null && track.type === 'track');
+            }
+
+            allTracks = [...allTracks, ...validTracks];
         }
-    
-        if (!playlistName) {
-            throw new Error("Playlist name undefined");
+
+        if (!commonFields) {
+            throw new Error(`${mediaType} name undefined`);
         }
-    
-        return [allTracks, playlistName];
+
+        return { tracks: allTracks, commonFields: commonFields };
     }
-    
+
+
 }
 
 export default SpotifyAPI;

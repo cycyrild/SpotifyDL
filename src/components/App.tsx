@@ -1,17 +1,17 @@
 import React from 'react';
 import Track from './Track';
-import useSpotifyData from '../hooks/useSpotifyData';
+import useSpotifyData from '../hooks/use-spotify-data';
 import * as Helpers from '../utils/helpers';
-import { TrackObject } from '../spotify-api/spotify-playlist';
+import { TrackObject, MediaType } from '../spotify-api/spotify-types';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleNotch, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faCircleNotch, faCircleExclamation, faStream, faCompactDisc } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
-
+import { TracksCommonFields } from '../spotify-api/interfaces';
 import { DownloadResult } from '../downloader';
 
 const App: React.FC = () => {
-  const { tracks, tracksTitle, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
+  const { tracksCommonFields, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
 
   const bottomStyles = {
     "--progress": `${overallProgress}%`,
@@ -41,8 +41,9 @@ const App: React.FC = () => {
   const downloadAll = async () => {
     if (remainingItems != 0)
       return;
-    if (spotifyAccessToken.current && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set(tracks.map(x => x.id)), spotifyAccessToken.current, audioQuality, chromeDownload);
+    if (spotifyAccessToken.current && downloaderRef.current && tracksCommonFields) {
+      const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
+      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, audioQuality, chromeDownload);
     } else {
       console.error('No Spotify access token or downloader available');
     }
@@ -70,20 +71,31 @@ const App: React.FC = () => {
       </div>)
   }
 
+  const getIcon = (type: MediaType) => {
+    switch (type) {
+      case MediaType.Playlist:
+        return faStream
+
+      case MediaType.Album:
+        return faCompactDisc
+    }
+  }
 
   return (
-
-
-    <div>
-
+    <>
       <div className="top top-elt ui-bar">
         <h1>SPOTIFY DL V1</h1>
       </div>
-      <h3 className='window-title'>{tracksTitle}</h3>
+      {tracksCommonFields &&
+        <h2>
+          <FontAwesomeIcon icon={getIcon(tracksCommonFields.commonFields.type)}></FontAwesomeIcon>
+          <span>{tracksCommonFields.commonFields.name}</span>
+        </h2>
+      }
 
       <div className='tracks'>
-        {tracks.map((track, index) => (
-          <Track progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
+        {tracksCommonFields?.tracks.map((track, index) => (
+          <Track commonFields={tracksCommonFields.commonFields} progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
         ))}
       </div>
 
@@ -110,8 +122,7 @@ const App: React.FC = () => {
           <div className="progress"></div>
         </div>
       </div>
-
-    </div>
+    </>
   );
 
 };

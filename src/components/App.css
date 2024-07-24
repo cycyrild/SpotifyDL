@@ -10,13 +10,21 @@ body {
     --button-height: 40px;
     --bubble-height: 25px;
 
-    background-color: var(--main-color);
-
     margin-top: var(--top-height);
     margin-bottom: var(--bottom-height);
     font-family: 'Oswald', sans-serif;
 
     font-size: var(--font-size);
+}
+
+body::before {
+    content: "";
+    background: linear-gradient(var(--top-color) 0%, var(--main-color) 50%);
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
 }
 
 .ui-bar {
@@ -180,8 +188,19 @@ h1 {
     }
 }
 
-.window-title {
+h2 {
     margin: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: calc(1.125 * var(--font-size));
     margin-bottom: 10px;
+}
+
+h2 span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 

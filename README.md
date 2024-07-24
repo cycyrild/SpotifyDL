@@ -1,7 +1,7 @@
 ## SpotifyDL Chrome Extension
 
 ### Description
-Allows users to download Spotify playlist tracks from the browser.
+Allows users to download playlist or album Spotify from the browser.
 
 - Using Widevine CDM: Implements Widevine's Content Decryption Module (CDM) to obtain track decryption keys.
 - Integrated decryption of the protected file and addition of MP4 metadata with FFmpeg WASM.
@@ -43,7 +43,7 @@ You have **two options** to install the extension:
      
 ### Usage
 1. Log in to your Spotify account on the Spotify web player.
-2. Navigate to a playlist you want to download.
+2. Navigate to a playlist or album you want to download.
 3. Click on the SpotifyDL extension icon in the Chrome toolbar.
 4. The extension will analyze the current page and display the list of tracks available for download.
 5. Select the tracks you want to download and click.
