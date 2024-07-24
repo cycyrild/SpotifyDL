@@ -7,7 +7,7 @@ export interface TrackMetadata {
   disc_number: number;
   duration: number;
   popularity: number;
-  external_id: ExternalId[];
+  external_id?: ExternalId[];
   restriction?: Restriction[];
   alternative?: Alternative[];
   earliest_live_timestamp: number;

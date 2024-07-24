@@ -75,10 +75,6 @@ h1 {
     pointer-events: none;
 }
 
-.bottom-bar > * {
-    pointer-events: auto;
-}
-
 .button {
     --bg-1: rgb(0 128 0 / 25%);
     --bg-2: rgba(128, 75, 0, 0.35);
@@ -94,8 +90,8 @@ h1 {
     transition: box-shadow ease 150ms;
     overflow: hidden;
     cursor: pointer;
-
-    margin: 0 auto 0 auto;
+    pointer-events: auto;
+    align-self: center;
 }
 
 .progress {
@@ -119,11 +115,20 @@ h1 {
     font-size: calc(0.4 * var(--btn-height));
 }
 
+.bubbles {
+    display: flex;
+    gap: 2.5%;
+    pointer-events: none;
+    flex-direction: row-reverse;
+    margin-right: 2%;
+    opacity: 0.65;
+}
+
 .bubble {
+    --bg-alpha: 25%;
     --padding: 2.5%;
-    background: rgb(0 0 0 / 25%);
+    background-color: rgb(0 0 0 / var(--bg-alpha));
     height: var(--bubble-height);
-    margin: 0 1% 0 auto;
     border-radius: 200px;
     display: flex;
     align-items: center;
@@ -131,7 +136,15 @@ h1 {
     font-weight: 300;
     gap: 10px;
     padding: 0 var(--padding) 0 var(--padding);
-    opacity: 0.65;
+    pointer-events: auto;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color, color ease 250ms;
+}
+
+.bubble:hover {
+    --bg-alpha: 100%;
+    color: ghostwhite;
 }
 
 .center-icon {
@@ -171,3 +184,4 @@ h1 {
     margin: 0;
     margin-bottom: 10px;
 }
+

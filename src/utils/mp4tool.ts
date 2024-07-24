@@ -59,7 +59,7 @@ class MP4Tool {
             '-metadata', `date=${convertToLongDateUS(metadata.album.date)}`,
             '-metadata', `artist=${metadata.artist.map(x => x.name).join('; ')}`,
             '-metadata', `album_artist=${metadata.album.artist.map(x => x.name).join(', ')}`,
-            '-metadata', `comment=${metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join('\n')}`,
+            '-metadata', `comment=${metadata.external_id ? metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join('\n') : ''}`,
             '-metadata', `disc=${metadata.disc_number}`,
             '-c:a', 'copy',
             outputFilename

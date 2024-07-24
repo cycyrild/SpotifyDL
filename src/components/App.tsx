@@ -6,7 +6,7 @@ import { TrackObject } from '../spotify-api/spotify-playlist';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
-import { faDiscord } from '@fortawesome/free-brands-svg-icons'
+import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 
 import { DownloadResult } from '../downloader';
 
@@ -88,11 +88,19 @@ const App: React.FC = () => {
       </div>
 
       <div className='bottom-bar ui-bar'>
-        <div className='bubble'>
-          <FontAwesomeIcon
-            icon={faDiscord}
-          />
-          cyril13600
+        <div className='bubbles'>
+          <div className='bubble'>
+            <FontAwesomeIcon
+              icon={faDiscord}
+            />
+            cyril13600
+          </div>
+          <a className='bubble' href='https://github.com/cycyrild/SpotifyDL' target="_blank">
+            <FontAwesomeIcon
+              icon={faGithub}
+            />
+            cycyrild/SpotifyDL
+          </a>
         </div>
         <div className="button" style={bottomStyles} onClick={downloadAll}>
 
