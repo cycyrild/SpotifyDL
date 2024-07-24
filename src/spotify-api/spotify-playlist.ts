@@ -55,7 +55,7 @@ export interface Playlist {
     added_at: string | null;
     added_by: AddedBy;
     is_local: boolean;
-    track: TrackObject | EpisodeObject;
+    track?: TrackObject | EpisodeObject;
   }
   
   interface AddedBy {
@@ -135,7 +135,7 @@ export interface Playlist {
     uri: string;
   }
   
-  interface EpisodeObject {
+ interface EpisodeObject {
     audio_preview_url: string | null;
     description: string;
     html_description: string;

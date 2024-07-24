@@ -48,17 +48,6 @@ const App: React.FC = () => {
     }
   }
 
-  const renderTrackLists = () => {
-    const validTracks = tracks.filter(track => track?.id);
-
-    return (
-      validTracks.map((track, index) => (
-        <Track progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
-      ))
-    );
-  };
-
-
 
   if (loading) {
     return (
@@ -93,7 +82,9 @@ const App: React.FC = () => {
       <h3 className='window-title'>{tracksTitle}</h3>
 
       <div className='tracks'>
-        {renderTrackLists()}
+        {tracks.map((track, index) => (
+          <Track progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
+        ))}
       </div>
 
       <div className='bottom-bar ui-bar'>

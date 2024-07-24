@@ -132,9 +132,11 @@ class SpotifyAPI {
             if (!playlistName) {
                 playlistName = playlist.name;
             }
-    
-            const tracks = playlist.tracks.items
-                .map(item => item.track)
+            const validTracks = playlist.tracks.items
+            .map(item => item.track)
+            .filter((track): track is TrackObject => track !== undefined && track !== null);
+        
+            const tracks = validTracks
                 .filter((track): track is TrackObject => track.type === 'track');
     
             allTracks = [...allTracks, ...tracks];
