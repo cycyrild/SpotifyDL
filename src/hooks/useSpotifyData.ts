@@ -53,7 +53,7 @@ const useSpotifyData = () => {
                 const playlistId = getPlaylistIdFromUrl(url);
 
                 if (!playlistId) {
-                    throw new Error(`No Spotify playlist open in current tab (${url}). Please open a playlist and reopen the extension.`);
+                    throw new Error(`No Spotify playlist open in current tab (${url}).\nPlease open a playlist and reopen the extension.`);
                 }
 
                 downloaderRef.current = new Downloader(downloadState);
