@@ -9,7 +9,7 @@ import { TrackMetadata } from "./spotify-api/metadata";
 import { FileDownloadData } from "./utils/helpers"
 import * as Helpers from "./utils/helpers"
 import MP4Tool from "./utils/mp4tool";
-import { TrackDownloadManager, UIUpdateCallback } from "./utils/downloadManager";
+import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
 
 const DEVICE_URL = 'device.bin';
@@ -21,8 +21,8 @@ export interface DownloadResult {
 
 class Downloader {
 
-  private mp4Tool: MP4Tool | undefined = undefined;
-  private device: DeviceV2 | undefined = undefined
+  private mp4Tool?: MP4Tool;
+  private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
 
   constructor(uiUpdateCallback: UIUpdateCallback) {

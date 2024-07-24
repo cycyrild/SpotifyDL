@@ -2,12 +2,11 @@ import React from 'react';
 import Track from './Track';
 import useSpotifyData from '../hooks/useSpotifyData';
 import * as Helpers from '../utils/helpers';
-import { SpotifyTrack } from '../spotify-api/spotifyPlaylist';
+import { TrackObject } from '../spotify-api/spotify-playlist';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
-import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
-
+import { faCircleNotch, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 
 import { DownloadResult } from '../downloader';
 
@@ -25,7 +24,7 @@ const App: React.FC = () => {
     Helpers.chromeDownload(file.data, file.metadata.original_title);
   }
 
-  const trackDownload = async (track: SpotifyTrack) => {
+  const trackDownload = async (track: TrackObject) => {
 
     if (progressDetails[track.id] && !progressDetails[track.id].complete()) {
       console.log('Download not completed');
@@ -49,6 +48,17 @@ const App: React.FC = () => {
     }
   }
 
+  const renderTrackLists = () => {
+    const validTracks = tracks.filter(track => track?.id);
+
+    return (
+      validTracks.map((track, index) => (
+        <Track progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
+      ))
+    );
+  };
+
+
 
   if (loading) {
     return (
@@ -67,9 +77,10 @@ const App: React.FC = () => {
           icon={faCircleExclamation}
           size="6x"
         />
-        {error}
+        <pre>{error}</pre>
       </div>)
   }
+
 
   return (
 
@@ -82,18 +93,25 @@ const App: React.FC = () => {
       <h3 className='window-title'>{tracksTitle}</h3>
 
       <div className='tracks'>
-        {tracks.map((track, index) => (
-          <Track progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
-        ))}
+        {renderTrackLists()}
       </div>
 
-      <div className="bottom ui-bar" style={bottomStyles} onClick={downloadAll}>
-
-        <div className="bottom-section">
-          {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}` : `DOWNLOAD ALL`}
+      <div className='bottom-bar ui-bar'>
+        <div className='bubble'>
+          <FontAwesomeIcon
+            icon={faDiscord}
+          />
+          cyril13600
         </div>
-        <div className="progress"></div>
+        <div className="button" style={bottomStyles} onClick={downloadAll}>
+
+          <div className="button-section">
+            {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}` : `DOWNLOAD ALL`}
+          </div>
+          <div className="progress"></div>
+        </div>
       </div>
+
     </div>
   );
 

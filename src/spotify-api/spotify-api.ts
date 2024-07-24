@@ -1,7 +1,7 @@
 import * as Base62 from "./base62";
 import { ImageSize, TrackMetadata } from "./metadata";
 import * as Helpers from "../utils/helpers"
-import { SpotifyPlaylist, SpotifyTrack } from "./spotifyPlaylist";
+import { Playlist, TrackObject } from "./spotify-playlist";
 
 class SpotifyAPI {
     static getTrackGid(trackId: string): string {
@@ -86,7 +86,7 @@ class SpotifyAPI {
                 throw new Error(`Failed to fetch playlist: ${firstPageReq.statusText}`);
             }
     
-            const firstPage = await firstPageReq.json();
+            const firstPage : Playlist = await firstPageReq.json();
     
             if (!firstPage.tracks || !firstPage.tracks.items) {
                 throw new Error("Invalid response structure");
@@ -122,24 +122,31 @@ class SpotifyAPI {
     }
     
 
-    static async getAllTracksFromPlaylist(playlistId: string, accessToken: string): Promise<[SpotifyTrack[], string]> {
+    static async getAllTracksFromPlaylist(playlistId: string, accessToken: string): Promise<[TrackObject[], string]> {
         const playlistIterator = SpotifyAPI.getPlaylistInfo(playlistId, accessToken);
-        let playlistName: string|undefined = undefined;
-
-        let allTracks: SpotifyTrack[] = [];
+        let playlistName: string | undefined = undefined;
+    
+        let allTracks: TrackObject[] = [];
     
         for await (const playlist of playlistIterator) {
-            if(!playlistName)
-                playlistName = playlist.name
-            const tracks = playlist.tracks.items.map(item => item.track);
+            if (!playlistName) {
+                playlistName = playlist.name;
+            }
+    
+            const tracks = playlist.tracks.items
+                .map(item => item.track)
+                .filter((track): track is TrackObject => track.type === 'track');
+    
             allTracks = [...allTracks, ...tracks];
         }
-
-        if(!playlistName)
+    
+        if (!playlistName) {
             throw new Error("Playlist name undefined");
-
+        }
+    
         return [allTracks, playlistName];
     }
+    
 }
 
 export default SpotifyAPI;

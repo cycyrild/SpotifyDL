@@ -1,17 +1,18 @@
 import React from 'react';
 import './Track.css';
-import { SpotifyPlaylist, SpotifyTrack } from "../spotify-api/spotifyPlaylist";
-import { FileProgressStateImpl } from "../utils/downloadManager"
+import { Playlist, TrackObject } from "../spotify-api/spotify-playlist";
+import { FileProgressStateImpl } from "../utils/download-manager"
 
 export interface TrackProps {
-    track: SpotifyTrack;
+    track: TrackObject;
     progress: FileProgressStateImpl | undefined;
-    onClick: (track: SpotifyTrack) => Promise<void>;
+    onClick: (track: TrackObject) => Promise<void>;
 }
 
 
 const Track: React.FC<TrackProps> = ({ track, progress, onClick }) => {
-    const imgSrc = track.album.images.length > 0 ? track.album.images.sort((a, b) => a.width - b.width)[0]?.url : '';
+    const imgSrc = track.album.images.length > 0 ? track.album.images
+        .sort((a, b) => (a.width||0) - (b.width||0))[0]?.url : '';
     const trackArtistsStrg = track.artists.map(x => x.name).join(' ');
 
     const trackEltStyle =

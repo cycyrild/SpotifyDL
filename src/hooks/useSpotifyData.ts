@@ -2,12 +2,12 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Downloader from '../downloader';
 import { SpotifyAuth } from '../spotifyauth';
 import * as Helpers from '../utils/helpers';
-import { UIUpdateCallback, FileProgressStateImpl } from '../utils/downloadManager';
+import { UIUpdateCallback, FileProgressStateImpl } from '../utils/download-manager';
 import SpotifyAPI from "../spotify-api/spotify-api";
-import { SpotifyPlaylist, SpotifyTrack } from "../spotify-api/spotifyPlaylist";
+import { Playlist, TrackObject } from "../spotify-api/spotify-playlist";
 
 const useSpotifyData = () => {
-    const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
+    const [tracks, setTracks] = useState<TrackObject[]>([]);
     const [tracksTitle, setTracksTitle] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
     const [overallProgress, setOverallProgress] = useState<number>(100);
@@ -53,7 +53,7 @@ const useSpotifyData = () => {
                 const playlistId = getPlaylistIdFromUrl(url);
 
                 if (!playlistId) {
-                    throw new Error("No Spotify playlists detected on this page.");
+                    throw new Error(`No Spotify playlist open in current tab (${url}). Please open a playlist and reopen the extension.`);
                 }
 
                 downloaderRef.current = new Downloader(downloadState);
