@@ -1,17 +1,21 @@
 import React from 'react';
 import './Track.css';
-import { Playlist, TrackObject, CommonFields, ImageObject } from "../spotify-api/spotify-types";
+import { TrackObjectSimplified, ImageObject, TrackObjectFull } from "../spotify-api/spotify-types";
+import { CommonFields } from '../spotify-api/interfaces';
 import { FileProgressStateImpl } from "../utils/download-manager"
-export interface TrackProps {
-    track: TrackObject;
+export interface TrackProps<T extends TrackObjectSimplified> {
+    track: T;
     commonFields: CommonFields;
     progress: FileProgressStateImpl | undefined;
-    onClick: (track: TrackObject) => Promise<void>;
+    onClick: (track: T) => Promise<void>;
 }
 
 
-const Track: React.FC<TrackProps> = ({ track, commonFields, progress, onClick }) => {
+const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonFields, progress, onClick }) => {
 
+    const isTrackObjectContainAlbum = (track: TrackObjectSimplified | TrackObjectFull): track is TrackObjectFull => {
+        return (track as TrackObjectFull).album !== undefined;
+    };
 
     const getImgSrc = () => {
 
@@ -24,7 +28,7 @@ const Track: React.FC<TrackProps> = ({ track, commonFields, progress, onClick })
             return res;
         }
 
-        if (track.album && track.album.images.length > 0) {
+        if (isTrackObjectContainAlbum(track) && track.album.images.length > 0) {
             return getTinyestImage(track.album.images);
         }
 

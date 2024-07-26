@@ -1,11 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Downloader from '../downloader';
 import { SpotifyAuth } from '../spotifyauth';
-import * as Helpers from '../utils/helpers';
 import { UIUpdateCallback, FileProgressStateImpl } from '../utils/download-manager';
 import SpotifyAPI from "../spotify-api/spotify-api";
-import { TrackObject, CommonFields, MediaType } from "../spotify-api/spotify-types";
-import { TracksCommonFields } from '../spotify-api/interfaces';
+import { TracksCommonFields, MediaType } from '../spotify-api/interfaces';
 
 const useSpotifyData = () => {
     const [tracksCommonFields, setTracksCommonFields] = useState<TracksCommonFields | undefined>();
@@ -62,13 +60,23 @@ const useSpotifyData = () => {
             spotifyAccessToken.current = token.accessToken;
 
             const medias = getIdFromUrl(url);
+            let tracksCommonFields: TracksCommonFields;
 
-            if(!medias)
-            {
+            if (!medias) {
                 throw new Error(`No ${Object.values(MediaType).join(', ')} Spotify currently opened in this tab.\nPlease open one then reopen the extension.`);
             }
 
-            const tracksCommonFields = await SpotifyAPI.getAllTracksFromMedia(medias[1], token.accessToken, medias[0]);
+            switch (medias[0]) {
+                case MediaType.Album:
+                    tracksCommonFields = await SpotifyAPI.getAllTracksFromAlbum(medias[1], spotifyAccessToken.current);
+                    break;
+                case MediaType.Playlist:
+                    tracksCommonFields = await SpotifyAPI.getAllTracksFromPlaylist(medias[1], spotifyAccessToken.current);
+                    break;
+                case MediaType.Track:
+                    tracksCommonFields = await SpotifyAPI.getTrack(medias[1], spotifyAccessToken.current);
+                    break;
+            }
 
             downloaderRef.current = await downloaderLoadTask;
             setTracksCommonFields(tracksCommonFields);

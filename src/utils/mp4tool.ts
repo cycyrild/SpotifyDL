@@ -1,8 +1,5 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-
-import { TrackMetadata, DateMetadata } from '../spotify-api/metadata';
-import { FileDownloadData } from "./helpers"
-import { Buffer } from 'buffer';
+import { TrackMetadata } from '../spotify-api/metadata';
 import { TrackData } from "../trackdata"
 
 
@@ -30,12 +27,11 @@ class MP4Tool {
 
     private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string) {
 
-        function convertToLongDateUS(date) {
+        function convertToISO8601(date) {
             const year = date.year;
-            const month = date.month ? date.month - 1 : 0;
-            const day = date.day ? date.day : 1;
-            const jsDate = new Date(year, month, day);
-            return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(jsDate);
+            const month = date.month ? String(date.month).padStart(2, '0') : '01';
+            const day = date.day ? String(date.day).padStart(2, '0') : '01';
+            return `${year}-${month}-${day}`;
         }
 
         let ffmpegArgs = [
@@ -54,17 +50,25 @@ class MP4Tool {
             ffmpegArgs.push("-map", "0");
         }
 
-        ffmpegArgs.push(
-            '-metadata', `title=${metadata.original_title}`,
-            '-metadata', `album=${metadata.album.name}`,
-            '-metadata', `date=${convertToLongDateUS(metadata.album.date)}`,
-            '-metadata', `artist=${metadata.artist.map(x => x.name).join('; ')}`,
-            '-metadata', `album_artist=${metadata.album.artist.map(x => x.name).join(', ')}`,
-            '-metadata', `comment=${metadata.external_id ? metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join('\n') : ''}`,
-            '-metadata', `disc=${metadata.disc_number}`,
-            '-c:a', 'copy',
-            outputFilename
-        );
+        const composer = metadata.artist_with_role.find(x => x.role === "ARTIST_ROLE_COMPOSER");
+
+        const metadataArgs = [
+            { key: 'title', value: metadata.original_title },
+            { key: 'album', value: metadata.album.name },
+            { key: 'date', value: convertToISO8601(metadata.album.date) },
+            { key: 'artist', value: metadata.artist.map(x => x.name).join('; ') },
+            { key: 'album_artist', value: metadata.album.artist.map(x => x.name).join('; ') },
+            { key: 'comment', value: metadata.external_id ? metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join(';') : '' },
+            { key: 'disc', value: metadata.disc_number },
+            { key: 'track', value: metadata.number },
+            { key: 'composer', value: composer ? composer.artist_name : '' },
+        ];
+
+        metadataArgs.forEach(arg => {
+            ffmpegArgs.push('-metadata', `${arg.key}=${arg.value}`);
+        });
+
+        ffmpegArgs.push('-c:a', 'copy', outputFilename);
 
         let error = await this.ffmpeg.exec(ffmpegArgs);
 

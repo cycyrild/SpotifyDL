@@ -1,10 +1,13 @@
 import * as Base62 from "./base62";
 import { ImageSize, TrackMetadata } from "./metadata";
-import * as Helpers from "../utils/helpers"
-import { Playlist, TrackObject, Album, CommonFields, PlaylistTrackObject, MediaType } from "./spotify-types";
-import { TracksCommonFields } from './interfaces'
+import { TrackObjectSimplified, PagingObject, PlaylistTrackObject, PlaylistObjectFull, AlbumObjectFull, TrackObjectFull } from "./spotify-types";
+import { TracksCommonFields, MediaType } from './interfaces'
+
+const PUBLIC_API_URL: string = "https://api.spotify.com/v1";
 
 class SpotifyAPI {
+
+
     static getTrackGid(trackId: string): string {
         return Base62.decodeToBigint(trackId).toString(16).padStart(32, "0");
     }
@@ -76,88 +79,77 @@ class SpotifyAPI {
         return new Uint8Array(data);
     }
 
-    static async *getMediaInfo(mediaId: string, accessToken: string, mediaType: MediaType) {
-        const fetchWithToken = this.fetchWithToken;
-        const url = mediaType === 'playlist' ? `https://api.spotify.com/v1/playlists/${mediaId}` : `https://api.spotify.com/v1/albums/${mediaId}`;
-
-        try {
-            const firstPageReq = await fetchWithToken(url, accessToken);
-
-            if (!firstPageReq.ok) {
-                throw new Error(`Failed to fetch ${mediaType}: ${firstPageReq.statusText}`);
-            }
-
-            const firstPage: any = await firstPageReq.json();
-
-            if (!firstPage.tracks || !firstPage.tracks.items) {
-                throw new Error("Invalid response structure");
-            }
-
-            let tracks: any[] = [...firstPage.tracks.items];
-            let nextPage = firstPage.tracks.next;
-
-            while (nextPage) {
-                const decodedNextPage = decodeURIComponent(nextPage);
-                const pageReq = await fetchWithToken(decodedNextPage, accessToken);
-
-                if (!pageReq.ok) {
-                    throw new Error(`Failed to fetch next page: ${pageReq.statusText}`);
-                }
-
-                const parsedPage = await pageReq.json();
-
-                if (!parsedPage.items) {
-                    throw new Error("Invalid page response structure");
-                }
-
-                tracks = [...tracks, ...parsedPage.items];
-                nextPage = parsedPage.next;
-            }
-
-            if (mediaType === 'playlist') {
-                firstPage.tracks.items = tracks.map((item: PlaylistTrackObject) => item.track) as TrackObject[];
-            } else {
-                firstPage.tracks.items = tracks as TrackObject[];
-            }
-
-            yield firstPage;
-        } catch (error) {
-            console.error(`Error in getMediaInfo: ${error.message}`);
-            throw error;
+    static async getAllTracksFromPlaylist(albumId: string, accessToken: string): Promise<TracksCommonFields> {
+        const url = `${PUBLIC_API_URL}/playlists/${albumId}`;
+        const playlistData = await this.fetchWithToken(url, accessToken);
+        const playlistJson: PlaylistObjectFull = await playlistData.json();
+    
+        let tracks: PlaylistTrackObject[] = playlistJson.tracks.items;
+        let next = playlistJson.tracks.next;
+    
+        while (next) {
+            const nextPage = await this.fetchWithToken(next, accessToken);
+            const nextPageJson:PagingObject<PlaylistTrackObject> = await nextPage.json();
+            tracks = tracks.concat(nextPageJson.items);
+            next = nextPageJson.next;
         }
+    
+        const filteredTracks = tracks.map(x => x.track).filter(x => x) as TrackObjectFull[];
+    
+        const res: TracksCommonFields = {
+            tracks: filteredTracks,
+            commonFields: {
+                name: playlistJson.name,
+                images : playlistJson.images,
+                type: MediaType.Playlist
+            }
+        }
+    
+        return res;
     }
 
-
-
-    static async getAllTracksFromMedia(mediaId: string, accessToken: string, mediaType: MediaType): Promise<TracksCommonFields> {
-        const mediaIterator = SpotifyAPI.getMediaInfo(mediaId, accessToken, mediaType);
-        let commonFields: CommonFields | undefined;
-
-        let allTracks: TrackObject[] = [];
-
-        for await (const media of mediaIterator) {
-            if (!commonFields) {
-                commonFields = media;
-            }
-
-            let validTracks: TrackObject[] = [];
-
-            if (mediaType === 'playlist') {
-                validTracks = (media.tracks.items as TrackObject[])
-                    .filter((track): track is TrackObject => track !== undefined && track !== null && track.type === 'track');
-            } else if (mediaType === 'album') {
-                validTracks = (media.tracks.items as TrackObject[])
-                    .filter((track): track is TrackObject => track !== undefined && track !== null && track.type === 'track');
-            }
-
-            allTracks = [...allTracks, ...validTracks];
+    static async getAllTracksFromAlbum(albumId: string, accessToken: string): Promise<TracksCommonFields> {
+        const url = `${PUBLIC_API_URL}/albums/${albumId}`;
+        const albumData = await this.fetchWithToken(url, accessToken);
+        const albumJson: AlbumObjectFull = await albumData.json();
+        let tracks: TrackObjectSimplified[] = albumJson.tracks.items;
+        let next = albumJson.tracks.next;
+    
+        while (next) {
+            const nextPage = await this.fetchWithToken(next, accessToken);
+            const nextPageJson: PagingObject<TrackObjectSimplified> = await nextPage.json();
+            
+            tracks = tracks.concat(nextPageJson.items);
+            next = nextPageJson.next;
         }
 
-        if (!commonFields) {
-            throw new Error(`${mediaType} name undefined`);
+        const res: TracksCommonFields = {
+            tracks: tracks,
+            commonFields: {
+                name: albumJson.name,
+                images : albumJson.images,
+                type: MediaType.Album
+            }
+        }
+    
+        return res;
+    }
+
+    static async getTrack(trackId: string, accessToken: string): Promise<TracksCommonFields> {
+        const url = `${PUBLIC_API_URL}/tracks/${trackId}`;
+        const trackData = await this.fetchWithToken(url, accessToken);
+        const trackDataJson: TrackObjectFull = await trackData.json();
+
+        const res: TracksCommonFields = {
+            tracks: [trackDataJson],
+            commonFields: {
+                name: trackDataJson.name,
+                images : trackDataJson.album.images,
+                type: MediaType.Track
+            }
         }
 
-        return { tracks: allTracks, commonFields: commonFields };
+        return res;
     }
 
 

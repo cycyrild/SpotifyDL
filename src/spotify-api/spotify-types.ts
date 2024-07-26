@@ -1,126 +1,77 @@
-interface ExternalUrls {
+// Enums
+enum AlbumGroup {
+  ALBUM = "album",
+  SINGLE = "single",
+  COMPILATION = "compilation",
+  APPEARS_ON = "appears_on"
+}
+
+enum AlbumType {
+  ALBUM = "album",
+  SINGLE = "single",
+  COMPILATION = "compilation"
+}
+
+enum ReleaseDatePrecision {
+  YEAR = "year",
+  MONTH = "month",
+  DAY = "day"
+}
+
+enum PlaylistType {
+  PLAYLIST = "playlist"
+}
+
+enum TrackType {
+  TRACK = "track"
+}
+
+// Context Object
+interface ContextObject {
+  type: "artist" | "playlist" | "album" | "show" | "episode";
+  href: string;
+  external_urls: ExternalUrlObject;
+  uri: string;
+}
+
+// External Url Object
+interface ExternalUrlObject {
   spotify: string;
 }
 
-interface Followers {
-  href: string | null;
-  total: number;
-}
-
-export interface ImageObject {
+// Image Object
+interface ImageObject {
+  height?: number | undefined;
   url: string;
-  height: number | null;
-  width: number | null;
+  width?: number | undefined;
 }
 
-interface SimplifiedArtistObject {
-  external_urls: ExternalUrls;
+// Restrictions Object
+interface RestrictionsObject {
+  reason: string;
+}
+
+// User Objects
+interface UserObjectPublic {
+  display_name?: string | undefined;
+  external_urls: ExternalUrlObject;
+  followers?: FollowersObject | undefined;
   href: string;
   id: string;
-  name: string;
-  type: "artist";
-  uri: string;
-}
-
-export interface TrackObject {
-  album?: Album;
-  artists: SimplifiedArtistObject[];
-  available_markets: string[];
-  disc_number: number;
-  duration_ms: number;
-  explicit: boolean;
-  external_ids: {
-    isrc: string;
-    ean: string;
-    upc: string;
-  };
-  external_urls: ExternalUrls;
-  href: string;
-  id: string;
-  is_playable: boolean;
-  linked_from?: any;
-  restrictions?: {
-    reason: RestrictionReason;
-  };
-  name: string;
-  popularity: number;
-  preview_url: string | null;
-  track_number: number;
-  type: "track";
-  uri: string;
-  is_local: boolean;
-}
-
-interface AddedBy {
-  external_urls: ExternalUrls;
-  followers: Followers;
-  href: string | null;
-  id: string;
+  images?: ImageObject[] | undefined;
   type: "user";
   uri: string;
 }
 
-enum ReleaseDatePrecision {
-  Year = "year",
-  Month = "month",
-  Day = "day"
+interface FollowersObject {
+  href: null;
+  total: number;
 }
 
-enum RestrictionReason {
-  Market = "market",
-  Product = "product",
-  Explicit = "explicit"
-}
-
-interface EpisodeObject {
-  audio_preview_url: string | null;
-  description: string;
-  html_description: string;
-  duration_ms: number;
-  explicit: boolean;
-  external_urls: ExternalUrls;
+// Paging Objects
+interface PagingObject<T> {
   href: string;
-  id: string;
-  images: ImageObject[];
-  is_externally_hosted: boolean;
-  is_playable: boolean;
-  languages: string[];
-  name: string;
-  release_date: string;
-  release_date_precision: ReleaseDatePrecision;
-  resume_point?: any;
-  type: "episode";
-  uri: string;
-  restrictions?: {
-    reason: RestrictionReason;
-  };
-  show: Show;
-}
-
-interface Show {
-  external_urls: ExternalUrls;
-  href: string;
-  id: string;
-  images: ImageObject[];
-  name: string;
-  publisher: string;
-  type: "show";
-  uri: string;
-}
-
-interface CopyrightObject {
-  text: string;
-  type: string;
-}
-
-interface ExternalIds {
-  isrc?: string;
-  ean?: string;
-  upc?: string;
-}
-
-interface Tracks {
-  href: string;
+  items: T[];
   limit: number;
   next: string | null;
   offset: number;
@@ -128,70 +79,185 @@ interface Tracks {
   total: number;
 }
 
-interface AlbumTracks extends Tracks {
-  items: TrackObject[];
-}
-
-interface PlaylistTracks extends Tracks {
-  items: PlaylistTrackObject[];
-}
-
-export interface PlaylistTrackObject {
-  added_at: string | null;
-  added_by: AddedBy;
-  is_local: boolean;
-  track?: TrackObject | EpisodeObject;
-}
-
-export enum MediaType {
-  Playlist = "playlist",
-  Album = "album"
-}
-
-export interface CommonFields {
-  available_markets: string[];
-  external_urls: ExternalUrls;
+interface CursorBasedPagingObject<T> {
   href: string;
+  items: T[];
+  limit: number;
+  next: string | null;
+  cursors: CursorObject;
+  total?: number | undefined;
+}
+
+interface CursorObject {
+  after: string;
+  before?: string | undefined;
+}
+
+// Playlists
+interface PlaylistBaseObject extends ContextObject {
+  collaborative: boolean;
+  description: string | null;
   id: string;
   images: ImageObject[];
   name: string;
-  restrictions?: {
-    reason: RestrictionReason;
+  owner: UserObjectPublic;
+  public: boolean | null;
+  snapshot_id: string;
+  type: PlaylistType;
+}
+
+interface PlaylistObjectFull extends PlaylistBaseObject {
+  followers: FollowersObject;
+  tracks: PagingObject<PlaylistTrackObject>;
+}
+
+interface PlaylistObjectSimplified extends PlaylistBaseObject {
+  tracks: {
+      href: string;
+      total: number;
   };
-  type: MediaType;
+}
+
+interface PlaylistTrackObject {
+  added_at: string;
+  added_by: UserObjectPublic;
+  is_local: boolean;
+  track: TrackObjectFull | null;
+}
+
+interface ListOfUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> {}
+
+interface ListOfCurrentUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> {}
+
+// Albums
+interface AlbumObjectFull extends AlbumObjectSimplified {
+  copyrights: CopyrightObject[];
+  external_ids: ExternalIdObject;
+  genres: string[];
+  label: string;
+  popularity: number;
+  tracks: PagingObject<TrackObjectSimplified>;
+}
+
+interface AlbumObjectSimplified extends ContextObject {
+  album_group?: AlbumGroup | undefined;
+  album_type: AlbumType;
+  artists: ArtistObjectSimplified[];
+  available_markets?: string[] | undefined;
+  id: string;
+  images: ImageObject[];
+  name: string;
+  release_date: string;
+  release_date_precision: ReleaseDatePrecision;
+  restrictions?: RestrictionsObject | undefined;
+  type: "album";
+  total_tracks: number;
+}
+
+interface SingleAlbumResponse extends AlbumObjectFull {}
+
+interface MultipleAlbumsResponse {
+  albums: AlbumObjectFull[];
+}
+
+interface AlbumTracksResponse extends PagingObject<TrackObjectSimplified> {}
+
+// Tracks
+export interface TrackObjectFull extends TrackObjectSimplified {
+  album: AlbumObjectSimplified;
+  external_ids: ExternalIdObject;
+  popularity: number;
+  is_local?: boolean | undefined;
+}
+
+interface TrackObjectSimplified {
+  artists: ArtistObjectSimplified[];
+  available_markets?: string[] | undefined;
+  disc_number: number;
+  duration_ms: number;
+  explicit: boolean;
+  external_urls: ExternalUrlObject;
+  href: string;
+  id: string;
+  is_playable?: boolean | undefined;
+  linked_from?: TrackLinkObject | undefined;
+  restrictions?: RestrictionsObject | undefined;
+  name: string;
+  preview_url: string | null;
+  track_number: number;
+  type: TrackType;
   uri: string;
 }
 
-export enum AlbumType {
-  Album = "album",
-  Single = "single",
-  Compilation = "compilation"
+interface SingleTrackResponse extends TrackObjectFull {}
+
+interface MultipleTracksResponse {
+  tracks: TrackObjectFull[];
 }
 
-export interface Album extends CommonFields {
-  album_type: AlbumType;
-  total_tracks: number;
-  artists: SimplifiedArtistObject[];
-  tracks?: AlbumTracks;
-  copyrights?: CopyrightObject[];
-  external_ids?: ExternalIds;
-  genres?: string[];
-  label?: string;
-  popularity?: number;
-  release_date: string;
-  release_date_precision: ReleaseDatePrecision;
+interface SavedTrackObject {
+  added_at: string;
+  track: TrackObjectFull;
 }
 
-interface Owner extends AddedBy {
-  display_name: string | null;
+interface UsersSavedTracksResponse extends PagingObject<SavedTrackObject> {}
+
+interface RecommendationsFromSeedsResponse extends RecommendationsObject {}
+
+// Additional supporting interfaces
+interface CopyrightObject {
+  text: string;
+  type: "C" | "P";
 }
 
-export interface Playlist extends CommonFields {
-  collaborative: boolean;
-  description: string | null;
-  followers: Followers;
-  owner: Owner;
-  public: boolean | null;
-  snapshot_id: string;
-  tracks: PlaylistTracks;
+interface ExternalIdObject {
+  isrc?: string | undefined;
+  ean?: string | undefined;
+  upc?: string | undefined;
 }
+
+interface ArtistObjectSimplified extends ContextObject {
+  name: string;
+  id: string;
+  type: "artist";
+}
+
+interface TrackLinkObject {
+  external_urls: ExternalUrlObject;
+  href: string;
+  id: string;
+  type: "track";
+  uri: string;
+}
+
+interface RecommendationsObject {
+  seeds: RecommendationsSeedObject[];
+  tracks: RecommendationTrackObject[];
+}
+
+interface RecommendationsSeedObject {
+  afterFilteringSize: number;
+  afterRelinkingSize: number;
+  href: string;
+  id: string;
+  initialPoolSize: number;
+  type: "artist" | "track" | "genre";
+}
+
+interface RecommendationTrackObject extends Omit<TrackObjectFull, "album"> {
+  album: RecommendationAlbumObject;
+}
+
+interface RecommendationAlbumObject extends Omit<AlbumObjectSimplified, "album_type"> {
+  album_type: "ALBUM" | "SINGLE" | "COMPILATION";
+}
+
+// Export interfaces
+export {
+  PlaylistObjectFull,
+  AlbumObjectFull,
+  PagingObject,
+  PlaylistTrackObject,
+  TrackObjectSimplified,
+  ImageObject
+};

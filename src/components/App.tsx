@@ -2,14 +2,15 @@ import React from 'react';
 import Track from './Track';
 import useSpotifyData from '../hooks/use-spotify-data';
 import * as Helpers from '../utils/helpers';
-import { TrackObject, MediaType } from '../spotify-api/spotify-types';
+import { MediaType } from '../spotify-api/interfaces';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleNotch, faCircleExclamation, faStream, faCompactDisc } from '@fortawesome/free-solid-svg-icons';
+import { faCircleNotch, faCircleExclamation, faStream, faCompactDisc, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
-import { TracksCommonFields } from '../spotify-api/interfaces';
+import { TracksCommonFields, } from '../spotify-api/interfaces';
 import { DownloadResult } from '../downloader';
 import { isUpdated } from '../utils/updateCheck';
+import { TrackObjectSimplified } from '../spotify-api/spotify-types';
 
 const App: React.FC = () => {
   const { tracksCommonFields, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
@@ -26,8 +27,7 @@ const App: React.FC = () => {
     Helpers.chromeDownload(file.data, file.metadata.original_title);
   }
 
-  const trackDownload = async (track: TrackObject) => {
-
+  const trackDownload = async (track: TrackObjectSimplified) => {
     if (progressDetails[track.id] && !progressDetails[track.id].complete()) {
       console.log('Download not completed');
       return;
@@ -41,8 +41,11 @@ const App: React.FC = () => {
   }
 
   const downloadAll = async () => {
-    if (remainingItems != 0)
+    if (remainingItems != 0) {
+      console.log('Download not completed');
       return;
+    }
+
     if (spotifyAccessToken.current && downloaderRef.current && tracksCommonFields) {
       const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
       await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, audioQuality, chromeDownload);
@@ -88,6 +91,9 @@ const App: React.FC = () => {
 
       case MediaType.Album:
         return faCompactDisc
+
+      case MediaType.Track:
+        return faMusic;
     }
   }
 

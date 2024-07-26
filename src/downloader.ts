@@ -31,8 +31,11 @@ class Downloader {
   }
 
   private async loadDependencies() {
-    this.mp4Tool = await MP4Tool.create();
-    const deviceBytes = await Helpers.fetchAsBuffer(DEVICE_URL);
+    const [mp4Tool, deviceBytes] = await Promise.all([
+      MP4Tool.create(),
+      Helpers.fetchAsBuffer(DEVICE_URL)
+    ]);
+    this.mp4Tool = mp4Tool;
     this.device = DeviceV2Parser.parse(deviceBytes);
   }
 
