@@ -14,17 +14,18 @@ class MP4Tool {
 
     private ffmpeg: FFmpeg;
 
-    constructor() {
-        this.ffmpeg = new FFmpeg();
+    private constructor(ffmpeg: FFmpeg) {
+        this.ffmpeg = ffmpeg;
     }
 
-    async LoadFFmpeg() {
-
-        await this.ffmpeg.load({
+    static async create(): Promise<MP4Tool> {
+        const ffmpeg = new FFmpeg();
+        await ffmpeg.load({
             coreURL: FFMPEG_CORE,
             wasmURL: FFMPEG_CORE_WASM,
             workerURL: FFMPEG_WORKER
         });
+        return new MP4Tool(ffmpeg);
     }
 
     private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string) {
@@ -72,8 +73,6 @@ class MP4Tool {
         }
     }
 
-
-
     public async ProcessFiles(track: TrackData) {
         let coverFilename: string | undefined;
         let audioInputFilename: string;
@@ -82,22 +81,14 @@ class MP4Tool {
         audioOutputFilename = `A${track.metadata.gid}.${track.trackFiledata.extension}`;
         audioInputFilename = `B${track.metadata.gid}.${track.trackFiledata.extension}`;
 
-        if (!(track.trackFiledata?.arrayBuffer instanceof Buffer)) {
-            throw new Error("Inconsistent audioFile type");
-        }
-
         await this.ffmpeg.writeFile(audioInputFilename, track.trackFiledata.arrayBuffer);
 
         if (track.coverFileData) {
-            if (!(track.coverFileData.arrayBuffer instanceof Buffer)) {
-                throw new Error("Inconsistent coverFile type");
-            }
             coverFilename = `${track.metadata.gid}.${track.coverFileData.extension}`;
             await this.ffmpeg.writeFile(coverFilename, track.coverFileData.arrayBuffer);
         }
 
         await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.key);
-
 
         const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
 
@@ -109,7 +100,6 @@ class MP4Tool {
         this.ffmpeg.deleteFile(audioInputFilename);
 
         return decryptedFile;
-
     }
 }
 

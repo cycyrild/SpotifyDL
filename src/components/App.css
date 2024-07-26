@@ -6,9 +6,8 @@ body {
     --bottom-color: rgb(141, 187, 137);
 
     --top-height: 45px;
-    --bottom-height: 90px;
+    --bottom-height: 100px;
     --button-height: 40px;
-    --bubble-height: 25px;
 
     margin-top: var(--top-height);
     margin-bottom: var(--bottom-height);
@@ -134,16 +133,16 @@ h1 {
 
 .bubble {
     --bg-alpha: 25%;
-    --padding: 2.5%;
+    --paddingX: 12.5px;
+    --paddingY: 2.5px;
     background-color: rgb(0 0 0 / var(--bg-alpha));
-    height: var(--bubble-height);
     border-radius: 200px;
     display: flex;
     align-items: center;
-    font-size: calc(var(--font-size) * 0.8);
+    font-size: calc(var(--font-size) * 0.75);
     font-weight: 300;
     gap: 10px;
-    padding: 0 var(--padding) 0 var(--padding);
+    padding: var(--paddingY) var(--paddingX);
     pointer-events: auto;
     text-decoration: none;
     color: inherit;
@@ -176,6 +175,19 @@ h1 {
     max-width: 100%;
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.updated {
+    text-align: center;
+    font-size: calc(var(--font-size) * 0.7);
+    pointer-events: auto;
+    width: 50%;
+    margin: 0 auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 300;
+    color: darkred;
 }
 
 @keyframes spin {

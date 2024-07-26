@@ -9,9 +9,11 @@ import { faCircleNotch, faCircleExclamation, faStream, faCompactDisc } from '@fo
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { TracksCommonFields } from '../spotify-api/interfaces';
 import { DownloadResult } from '../downloader';
+import { isUpdated } from '../utils/updateCheck';
 
 const App: React.FC = () => {
   const { tracksCommonFields, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
+  const [updated, setUpdated] = React.useState(false);
 
   const bottomStyles = {
     "--progress": `${overallProgress}%`,
@@ -34,7 +36,7 @@ const App: React.FC = () => {
     if (spotifyAccessToken.current && downloaderRef.current) {
       await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, audioQuality, chromeDownload);
     } else {
-      console.error('No Spotify access token or downloader available');
+      console.error('No access token or downloader available');
     }
   }
 
@@ -45,10 +47,18 @@ const App: React.FC = () => {
       const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
       await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, audioQuality, chromeDownload);
     } else {
-      console.error('No Spotify access token or downloader available');
+      console.error('No access token or downloader available');
     }
   }
 
+  const executeAfterLoad = async () => {
+    const updated = await isUpdated();
+    setUpdated(updated);
+  }
+
+  React.useEffect(() => {
+    executeAfterLoad();
+  }, []);
 
   if (loading) {
     return (
@@ -107,12 +117,12 @@ const App: React.FC = () => {
             />
             cyril13600
           </div>
-          <a className='bubble' href='https://github.com/cycyrild/SpotifyDL' target="_blank">
+          <div className='bubble'>
             <FontAwesomeIcon
               icon={faGithub}
             />
             cycyrild/SpotifyDL
-          </a>
+          </div>
         </div>
         <div className="button" style={bottomStyles} onClick={downloadAll}>
 
@@ -121,6 +131,8 @@ const App: React.FC = () => {
           </div>
           <div className="progress"></div>
         </div>
+
+        {!updated && <div className='updated'>A new version is available!</div>}
       </div>
     </>
   );

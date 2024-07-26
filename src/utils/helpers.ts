@@ -5,8 +5,8 @@ import { fileTypeFromBuffer, FileTypeResult } from 'file-type';
 export type ProgressCallback = (loaded: number, total: number, id: string) => void;
 
 
-export type FileDownloadData = {
-  arrayBuffer: ArrayBuffer;
+export type FileDownloadData<T> = {
+  arrayBuffer: T;
   mimetype: string;
   extension: string;
 };
@@ -67,7 +67,7 @@ export async function fetchAsBuffer(url: string): Promise<Buffer> {
   return buffer;
 }
 
-export async function fetchUrlAsFileDataProgress(url: string, downloadId: string, onProgress: ProgressCallback): Promise<FileDownloadData> {
+export async function fetchUrlAsFileDataProgress(url: string, downloadId: string, onProgress: ProgressCallback): Promise<FileDownloadData<Buffer>> {
 
   const buffer = await fetchAsBufferProgress(url, downloadId, onProgress);
 
@@ -86,7 +86,7 @@ export async function fetchUrlAsFileDataProgress(url: string, downloadId: string
   return { arrayBuffer: buffer, mimetype, extension };
 }
 
-export async function fetchUrlAsFileData(url: string): Promise<FileDownloadData> {
+export async function fetchUrlAsFileData(url: string): Promise<FileDownloadData<Buffer>> {
   const buffer = await fetchAsBuffer(url);
 
   const fileType: FileTypeResult | undefined = await fileTypeFromBuffer(buffer);
@@ -105,7 +105,7 @@ export async function fetchUrlAsFileData(url: string): Promise<FileDownloadData>
 }
 
 
-export function chromeDownload(file: FileDownloadData, title: string) {
+export function chromeDownload(file: FileDownloadData<Uint8Array>, title: string) {
 
   function DownloadCallback(downloadId: number, blobUrl: string) {
     if (downloadId) {

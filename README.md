@@ -17,10 +17,15 @@ You have **two options** to install the extension:
 1. **Download a built version from releases:**
    - Go to the [releases](https://github.com/cycyrild/SpotifyDL/releases) page.
    - Download the latest release.
-   - Follow the steps to load the extension in Chrome:
-     - Open the Chrome browser and navigate to `chrome://extensions/`.
-     - Enable "Developer mode" by toggling the switch in the top-right corner.
-     - Click on "Load unpacked" and select the directory where the downloaded release files are located.
+
+    **Unzip the downloaded file:**
+   - Extract the contents of the downloaded file. You should see a folder with a subfolder named `dist`.
+
+    **Load the extension in Chrome:**
+   - Open the Chrome browser and navigate to `chrome://extensions/`.
+   - Enable "Developer mode" by toggling the switch in the top-right corner.
+   - Click on "Load unpacked" and select the `dist` directory which contains the `manifest.json` file.
+
 
 2. **Build from source:**
    - Clone the repository:

@@ -16,7 +16,7 @@ const DEVICE_URL = 'device.bin';
 
 export interface DownloadResult {
   metadata: TrackMetadata;
-  data: FileDownloadData;
+  data: FileDownloadData<Uint8Array>;
 };
 
 class Downloader {
@@ -25,22 +25,27 @@ class Downloader {
   private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
 
-  constructor(uiUpdateCallback: UIUpdateCallback) {
+  private constructor(uiUpdateCallback: UIUpdateCallback) {
 
     this.trackDownloadManager = new TrackDownloadManager(uiUpdateCallback);
   }
 
-  public async Load() {
-    this.mp4Tool = new MP4Tool();
-    await this.mp4Tool.LoadFFmpeg();
+  private async loadDependencies() {
+    this.mp4Tool = await MP4Tool.create();
     const deviceBytes = await Helpers.fetchAsBuffer(DEVICE_URL);
     this.device = DeviceV2Parser.parse(deviceBytes);
+  }
+
+  static async create(uiUpdateCallback: UIUpdateCallback): Promise<Downloader> {
+    const downloader = new Downloader(uiUpdateCallback);
+    await downloader.loadDependencies();
+    return downloader;
   }
 
   private async DownloadTrack(trackId: string, accessToken: string, downloadFormat: string): Promise<TrackData> {
 
     if (!this.device)
-      throw new Error(`Widevine device not initialized`);
+      throw new Error(`CDM device not initialized`);
 
     const gid = SpotifyAPI.getTrackGid(trackId);
 
@@ -65,7 +70,7 @@ class Downloader {
     const coverUrl = await SpotifyAPI.getCoverUrl(metadata, Metadata.ImageSize.DEFAULT);
 
     const downloadTrackTask = Helpers.fetchUrlAsFileDataProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-    let downloadCoverTask: Promise<FileDownloadData> | undefined = undefined;
+    let downloadCoverTask: Promise<FileDownloadData<Buffer>> | undefined = undefined;
 
     if (coverUrl) {
       downloadCoverTask = Helpers.fetchUrlAsFileData(coverUrl);
@@ -109,7 +114,7 @@ class Downloader {
       this.trackDownloadManager.initializeFile(id);
     });
 
-    const downloadPromises: Promise<any>[] = [];
+    const downloadPromises: Promise<TrackData>[] = [];
 
     trackIds.forEach(id => {
       const downloadPromise = this.DownloadTrack(id, accessToken, downloadFormat);
@@ -125,7 +130,7 @@ class Downloader {
         throw new Error(`ffmpeg not initialized`);
       const buffer = await this.mp4Tool.ProcessFiles(element);
 
-      const fileDataBuffer: FileDownloadData = {
+      const fileDataBuffer: FileDownloadData<Uint8Array> = {
         arrayBuffer: buffer,
         mimetype: element.trackFiledata.mimetype,
         extension: element.trackFiledata.extension

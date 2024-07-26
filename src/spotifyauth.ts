@@ -5,6 +5,8 @@ export interface AccessToken {
     isAnonymous: boolean;
 }
 
+const SPOTIFY_ACCESS_TOKEN_KEY = 'spotifyAccessToken';
+
 export class SpotifyAuth {
     private static async fetchAccessToken(cookie: string): Promise<AccessToken> {
         const URL = "https://open.spotify.com/get_access_token";
@@ -19,12 +21,12 @@ export class SpotifyAuth {
 
     private static async getAccessTokenFromCache(): Promise<AccessToken | null> {
         return new Promise((resolve, reject) => {
-            chrome.storage.local.get(['spotifyAccessToken'], (result) => {
+            chrome.storage.local.get([SPOTIFY_ACCESS_TOKEN_KEY], (result) => {
                 if (chrome.runtime.lastError) {
                     return reject(chrome.runtime.lastError);
                 }
 
-                const token: AccessToken = result.spotifyAccessToken;
+                const token: AccessToken = result[SPOTIFY_ACCESS_TOKEN_KEY];
                 if (token && token.accessTokenExpirationTimestampMs > Date.now()) {
                     resolve(token);
                 } else {
@@ -36,7 +38,7 @@ export class SpotifyAuth {
 
     private static async setAccessTokenInCache(token: AccessToken): Promise<void> {
         return new Promise((resolve, reject) => {
-            chrome.storage.local.set({ spotifyAccessToken: token }, () => {
+            chrome.storage.local.set({ [SPOTIFY_ACCESS_TOKEN_KEY]: token }, () => {
                 if (chrome.runtime.lastError) {
                     return reject(chrome.runtime.lastError);
                 }
@@ -70,4 +72,3 @@ export class SpotifyAuth {
         });
     }
 }
-

@@ -56,8 +56,7 @@ const useSpotifyData = () => {
                 throw new Error("Unable to retrieve current URL.");
             }
 
-            downloaderRef.current = new Downloader(downloadState);
-            const downloaderLoadTask = downloaderRef.current.Load();
+            const downloaderLoadTask = Downloader.create(downloadState);
 
             const token = await SpotifyAuth.getAccessToken();
             spotifyAccessToken.current = token.accessToken;
@@ -71,7 +70,7 @@ const useSpotifyData = () => {
 
             const tracksCommonFields = await SpotifyAPI.getAllTracksFromMedia(medias[1], token.accessToken, medias[0]);
 
-            await downloaderLoadTask;
+            downloaderRef.current = await downloaderLoadTask;
             setTracksCommonFields(tracksCommonFields);
             setLoading(false);
         } catch (error) {
