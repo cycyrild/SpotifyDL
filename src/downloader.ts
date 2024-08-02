@@ -11,6 +11,9 @@ import * as Helpers from "./utils/helpers"
 import MP4Tool from "./utils/mp4tool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
+import { AudioFormat, AudioFormatUtil } from "./audioformats";
+import { ContentType, Interactivity, PlayPlayLicenseRequest, PlayPlayLicenseResponse } from "./playplay/playplay";
+import { Writer } from "protobufjs/minimal";
 
 const DEVICE_URL = 'device.bin';
 
@@ -45,7 +48,7 @@ class Downloader {
     return downloader;
   }
 
-  private async DownloadTrack(trackId: string, accessToken: string, downloadFormat: string): Promise<TrackData> {
+  private async DownloadTrack(trackId: string, accessToken: string, downloadFormat: AudioFormat): Promise<TrackData> {
 
     if (!this.device)
       throw new Error(`CDM device not initialized`);
@@ -79,24 +82,65 @@ class Downloader {
       downloadCoverTask = Helpers.fetchUrlAsFileData(coverUrl);
     }
 
-    const pssh_b64 = await SpotifyAPI.getPsshB64(fileToDownload.file_id, accessToken);
+    let key: string | undefined;
 
-    const pssh_buffer = Buffer.from(pssh_b64, 'base64');;
+    if (AudioFormatUtil.isAAC(downloadFormat)) {
+      const pssh_b64 = await SpotifyAPI.getPsshB64(fileToDownload.file_id, accessToken);
 
-    const parsedPssh = Pssh.parse(pssh_buffer);
+      const pssh_buffer = Buffer.from(pssh_b64, 'base64');;
 
-    const cdm = new Cdm();
+      const parsedPssh = Pssh.parse(pssh_buffer);
 
-    const bytesArray = cdm.getLicenseChallenge(this.device, parsedPssh, LicenseProtocol.LicenseType.STREAMING);
+      const cdm = new Cdm();
 
-    const widevineLicense = await SpotifyAPI.getWidevineLicense(bytesArray, accessToken);
+      const bytesArray = cdm.getLicenseChallenge(this.device, parsedPssh, LicenseProtocol.LicenseType.STREAMING);
 
-    const parsedKeys = await cdm.parseLicenseAndGetKeys(widevineLicense, this.device);
+      const widevineLicense = await SpotifyAPI.getWidevineLicense(bytesArray, accessToken);
 
-    if (parsedKeys.length == 0)
-      throw new Error(`No keys found by the content decryption module`);
+      const parsedKeys = await cdm.parseLicenseAndGetKeys(widevineLicense, this.device);
 
-    const key = Helpers.toHexString(parsedKeys[0].keyValue);
+      if (parsedKeys.length == 0)
+        throw new Error(`No keys found by the content decryption module`);
+
+      key = Helpers.toHexString(parsedKeys[0].keyValue);
+    }
+    /*else if (AudioFormatUtil.isVorbis(downloadFormat)) {
+      let writer: Writer | undefined;
+
+      const playplay_license_request: PlayPlayLicenseRequest = PlayPlayLicenseRequest.create({
+        version: 2,
+        token: Buffer.from("01e132cae527bd21620e822f58514932", 'hex'),
+        contentType: ContentType.AUDIO_TRACK,
+        interactivity: Interactivity.INTERACTIVE,
+      });
+      writer = Writer.create();
+      PlayPlayLicenseRequest.encode(playplay_license_request, writer);
+      const playplay_license_request_bytes = Buffer.from(writer.finish());
+      const url = `https://gew4-spclient.spotify.com/playplay/v1/key/${fileToDownload.file_id}`;
+
+      const headers = new Headers({
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/octet-stream' // Ajustez si nécessaire
+      });
+
+      const requestOptions: RequestInit = {
+        method: 'POST',
+        headers: headers,
+        body: playplay_license_request_bytes
+      };
+
+      const response = await fetch(url, requestOptions);
+
+      const playplay_license_response = PlayPlayLicenseResponse.decode(new Uint8Array(await response.arrayBuffer()));
+      console.log(playplay_license_response);
+      debugger;
+    }*/
+    else
+      throw new Error(`Unsupported audio format ${downloadFormat}`);
+
+
+    if (!key)
+      throw new Error(`No key found for track ${trackId}`);
 
     const trackFiledata = await downloadTrackTask;
     const coverFileData = await downloadCoverTask;
@@ -106,12 +150,13 @@ class Downloader {
       coverFileData: coverFileData,
       key: key,
       metadata: metadata,
-      spotifyId: trackId
+      spotifyId: trackId,
+      audioFormat: downloadFormat
     };
     return obj;
   }
 
-  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: string, saveCallback: (result: DownloadResult) => void): Promise<void> {
+  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: AudioFormat, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
     trackIds.forEach(id => {
       this.trackDownloadManager.initializeFile(id);

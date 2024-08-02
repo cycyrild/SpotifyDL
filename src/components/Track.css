@@ -1,49 +1,31 @@
-.trackElt {
+.track-elt {
     --bg-default: rgb(255 255 255 / 40%);
     --bg-complete: rgb(106 172 103 / 50%);
     --bg-in-progress: rgb(255 255 255 / 80%);
-    --progress-color: rgb(0 106 255 / 45%);
-    display: flex;
+    --progress-color: rgb(0 0 255 / 50%);
+    --hover-color: rgb(255 255 255 / 25%);
+    --track-open-bg: rgb(0 0 0 / 25%);
     --track-elt-height: 45px;
+    --track-open-height:  250px;
+    --gap: 5px;
     height: var(--track-elt-height);
-    gap: 5px;
+    position: relative;
+    width: 100%;
+}
+
+.track-head {
+    display: flex;
+    gap: var(--gap);
     background-color: var(--track-elt-bg);
     overflow: hidden;
     position: relative;
     cursor: pointer;
     transition: background-color ease 500ms;
-}
-
-.cover {
-    background-color: aliceblue;
+    width: 100%;
     height: 100%;
-    aspect-ratio: 1/1;
 }
 
-.infoTrack {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-}
-
-.title {
-    font-weight: 800;
-    font-size: calc(var(--track-elt-height)*0.3525);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.artists {
-    font-size: calc(var(--track-elt-height)*0.325);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.trackElt::before {
+.track-head::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -56,16 +38,77 @@
     opacity: var(--progress-opacity);
 }
 
-.trackElt::after {
+.track-head::after {
     content: "";
     width: 100%;
     height: 100%;
     position: absolute;
     z-index: -1;
     transition: background ease 150ms;
-
 }
 
-.trackElt:hover::after {
-    background: rgb(255 255 255 / 25%);
+.track-head:hover::after {
+    background: var(--hover-color);
+}
+
+.track-head > *:last-child {
+    margin-right: var(--gap);
+}
+
+.track-head>.square {
+    height: 100%;
+    aspect-ratio: 1/1;
+}
+
+.track-head>.square.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.track-head>.square.center:hover {
+    background-color: var(--hover-color);
+}
+
+.track-head>.track-primary {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.track-primary>.title {
+    font-weight: 800;
+    font-size: calc(var(--track-elt-height)*0.325);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.track-primary>.artists {
+    font-size: calc(var(--track-elt-height)*0.32);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.track-elt.open .track-more-info {
+    transform: scaleY(1);
+}
+
+.track-elt.open {
+    margin-bottom: var(--track-open-height);
+}
+
+.track-more-info {
+    width: 100%;
+    height: var(--track-open-height);
+    position: absolute;
+    inset: 0;
+    transform: scaleY(0);
+    transition: transform ease 250ms;
+    background-color: var(--track-open-bg);
+    transform-origin: top;
+    top: var(--track-elt-height);
 }

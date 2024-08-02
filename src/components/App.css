@@ -88,7 +88,7 @@ h1 {
     --box-shadow-alpha: 0.5;
 
     position: relative;
-    
+
     background-color: var(--bottom-color);
     border-radius: 200px;
     width: 75%;
@@ -119,7 +119,7 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(0.4 * var(--btn-height));
+    letter-spacing: 1px;
 }
 
 .bubbles {
@@ -154,21 +154,13 @@ h1 {
     color: ghostwhite;
 }
 
-.center-icon {
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-}
-
-.spin {
-    animation: spin 2s linear infinite;
-}
-
 .error {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    align-items: center;
+    width: 75%;
+}
+
+.error .icon {
+    display: block;
+    margin: auto;
 }
 
 .error pre {
@@ -190,6 +182,14 @@ h1 {
     color: darkred;
 }
 
+.loading {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(1.25 * var(--font-size));
+}
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -201,12 +201,11 @@ h1 {
 }
 
 h2 {
-    margin: 0;
     display: flex;
     gap: 10px;
     align-items: center;
     font-size: calc(1.125 * var(--font-size));
-    margin-bottom: 10px;
+    margin: 0 5px 10px 5px;
 }
 
 h2 span {
@@ -216,3 +215,35 @@ h2 span {
     max-width: 100%;
 }
 
+.safe-area .center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+.safe-area {
+    position: absolute;
+    inset: 0;
+    top: var(--top-height);
+    height: calc(100% - var(--top-height) - var(--bottom-height));
+    z-index: -1;
+}
+
+
+.bubbles > .bubble > select {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    color: inherit;
+    outline: none;
+}
+.bubbles > .bubble > select > option {
+    background: white;
+    color: black;
+}
