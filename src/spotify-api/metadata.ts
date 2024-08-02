@@ -1,3 +1,5 @@
+import { AudioFormat } from "../audioformats";
+
 export interface TrackMetadata {
   gid: string;
   name: string;
@@ -83,7 +85,7 @@ export interface Alternative {
 
 export interface File {
   file_id: string
-  format: string
+  format: AudioFormat
 }
 
 export interface Preview {

@@ -3,6 +3,9 @@ import './Track.css';
 import { TrackObjectSimplified, ImageObject, TrackObjectFull } from "../spotify-api/spotify-types";
 import { CommonFields } from '../spotify-api/interfaces';
 import { FileProgressStateImpl } from "../utils/download-manager"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faInfo } from '@fortawesome/free-solid-svg-icons';
+
 export interface TrackProps<T extends TrackObjectSimplified> {
     track: T;
     commonFields: CommonFields;
@@ -38,6 +41,8 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
 
     const trackArtistsStrg = track.artists.map(x => x.name).join(' ');
 
+    const [moreInfoOpen, setMoreInfoOpen] = React.useState(false);
+
     const trackEltStyle =
         {
             "--progress": `${progress && !progress.finished ? progress.percentageProgress() : 0}%`,
@@ -45,19 +50,33 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
             "--track-elt-bg": `var(${progress ? (!progress.finished ? "--bg-in-progress" : "--bg-complete") : "--bg-default"})`
         } as React.CSSProperties;
 
+    const handleInfoClick = (event) => {
+        event.stopPropagation();
+        setMoreInfoOpen(!moreInfoOpen);
+    };
+
     return (
-        <div className="trackElt" onClick={async () => await onClick(track)} style={trackEltStyle}>
-            <img loading='lazy' className="cover" src={getImgSrc()} />
+        <div className={"track-elt" + (moreInfoOpen ? ' open' : '')}  >
+            <div className='track-head' onClick={async () => await onClick(track)} style={trackEltStyle}>
+                <img loading='lazy' className="square" src={getImgSrc()} />
 
-            <div className="infoTrack">
-                <div className="title" >
-                    {track.name}
+                <div className="track-primary">
+                    <div className="title" >
+                        {track.name}
+                    </div>
+                    <div className="artists">
+                        {trackArtistsStrg}
+                    </div>
                 </div>
-                <div className="artists">
-                    {trackArtistsStrg}
-                </div>
+
+                {/*<div className="square center" onClick={handleInfoClick}>
+                    <FontAwesomeIcon icon={faInfo} size='1x' />
+
+                </div>*/}
             </div>
+            <div className='track-more-info'>
 
+            </div>
         </div>
     );
 
