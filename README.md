@@ -6,8 +6,6 @@ Allows users to download track, playlist or album Spotify from the browser.
 - Using Widevine CDM: Implements Widevine's Content Decryption Module (CDM) to obtain track decryption keys.
 - Integrated decryption of the protected file and addition of MP4 metadata with FFmpeg WASM.
 
-**Note: Currently, downloads are in 128kbps quality (Spotify Free quality) due to the absence of a Spotify Premium account for development and testing. Higher quality downloads will be supported in future updates.**
-
 <img src="img1.png" style="width:700px;"/>
 
 ## Installation
