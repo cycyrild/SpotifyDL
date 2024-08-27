@@ -8,12 +8,10 @@ export interface AccessToken {
 const SPOTIFY_ACCESS_TOKEN_KEY = 'spotifyAccessToken';
 
 export class SpotifyAuth {
-    private static async fetchAccessToken(cookie: string): Promise<AccessToken> {
+    private static async fetchAccessToken(): Promise<AccessToken> {
         const URL = "https://open.spotify.com/get_access_token";
         const req = await fetch(URL, {
-            headers: {
-                cookie: `sp_dc=${cookie}`
-            }
+            credentials: "same-origin",
         });
         const resp: AccessToken = await req.json();
         return resp;
@@ -50,25 +48,10 @@ export class SpotifyAuth {
     public static async getAccessToken(): Promise<AccessToken> {
         let token = await this.getAccessTokenFromCache();
         if (!token) {
-            const cookie = await this.getSpotifyCookie();
-            if (!cookie) {
-                throw new Error('No Spotify login cookies detected. Please log in.');
-            }
-            token = await this.fetchAccessToken(cookie);
+            token = await this.fetchAccessToken();
             await this.setAccessTokenInCache(token);
         }
         return token;
     }
 
-    public static async getSpotifyCookie(): Promise<string | null> {
-        return new Promise((resolve) => {
-            chrome.cookies.get({ url: 'https://open.spotify.com', name: 'sp_dc' }, (cookie) => {
-                if (cookie) {
-                    resolve(cookie.value);
-                } else {
-                    resolve(null);
-                }
-            });
-        });
-    }
 }

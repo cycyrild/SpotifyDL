@@ -12,7 +12,6 @@ import MP4Tool from "./utils/mp4tool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
 import { AudioFormat, AudioFormatUtil } from "./audioformats";
-import { ContentType, Interactivity, PlayPlayLicenseRequest, PlayPlayLicenseResponse } from "./playplay/playplay";
 import { Writer } from "protobufjs/minimal";
 
 const DEVICE_URL = 'device.bin';
@@ -104,37 +103,6 @@ class Downloader {
 
       key = Helpers.toHexString(parsedKeys[0].keyValue);
     }
-    /*else if (AudioFormatUtil.isVorbis(downloadFormat)) {
-      let writer: Writer | undefined;
-
-      const playplay_license_request: PlayPlayLicenseRequest = PlayPlayLicenseRequest.create({
-        version: 2,
-        token: Buffer.from("01e132cae527bd21620e822f58514932", 'hex'),
-        contentType: ContentType.AUDIO_TRACK,
-        interactivity: Interactivity.INTERACTIVE,
-      });
-      writer = Writer.create();
-      PlayPlayLicenseRequest.encode(playplay_license_request, writer);
-      const playplay_license_request_bytes = Buffer.from(writer.finish());
-      const url = `https://gew4-spclient.spotify.com/playplay/v1/key/${fileToDownload.file_id}`;
-
-      const headers = new Headers({
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/octet-stream' // Ajustez si nécessaire
-      });
-
-      const requestOptions: RequestInit = {
-        method: 'POST',
-        headers: headers,
-        body: playplay_license_request_bytes
-      };
-
-      const response = await fetch(url, requestOptions);
-
-      const playplay_license_response = PlayPlayLicenseResponse.decode(new Uint8Array(await response.arrayBuffer()));
-      console.log(playplay_license_response);
-      debugger;
-    }*/
     else
       throw new Error(`Unsupported audio format ${downloadFormat}`);
 
