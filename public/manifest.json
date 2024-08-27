@@ -9,7 +9,6 @@
         "default_title": "Click to open popup"
     },
     "permissions": [
-        "cookies",
         "activeTab",
         "downloads",
         "storage"
