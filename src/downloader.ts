@@ -130,18 +130,24 @@ class Downloader {
       this.trackDownloadManager.initializeFile(id);
     });
 
-    const downloadPromises: Promise<TrackData>[] = [];
+    const downloadPromises: Promise<TrackData | null>[] = [];
 
     trackIds.forEach(id => {
-      const downloadPromise = this.DownloadTrack(id, accessToken, downloadFormat);
-      downloadPromises.push(downloadPromise);
+      const downloadPromise = this.DownloadTrack(id, accessToken, downloadFormat)
+        .catch(e => {
+          console.error(`Error downloading track ${id}: ${e}`);
+          this.trackDownloadManager.errorProgressCallback(id);
+          return null;
+        });
+
+        downloadPromises.push(downloadPromise);
     });
 
     const downloadedTracks = await Promise.all(downloadPromises);
 
+    const validTracks = downloadedTracks.filter((track): track is TrackData => track !== null);
 
-
-    for (const element of downloadedTracks) {
+    for (const element of validTracks) {
       if (!this.mp4Tool)
         throw new Error(`ffmpeg not initialized`);
       const buffer = await this.mp4Tool.ProcessFiles(element);

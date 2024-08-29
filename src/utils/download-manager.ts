@@ -19,6 +19,7 @@ export class FileProgressStateImpl implements FileProgressState {
     decrypted: boolean = false;
     saved: boolean = false;
     finished: boolean = false;
+    error: boolean = false;
 
     percentageProgress(): string {
         return (this.progress() * 100).toFixed(2);
@@ -33,7 +34,7 @@ export class FileProgressStateImpl implements FileProgressState {
     }
 
     complete(): boolean {
-        return this.downloadProgress === 100 && this.decrypted && this.saved;
+        return (this.downloadProgress === 100 && this.decrypted && this.saved) || this.error;
     }
 }
 
@@ -74,6 +75,15 @@ export class TrackDownloadManager {
         }
 
         this.progressStates[id].saved = true;
+        this.reportGlobalProgress();
+    };
+
+    public errorProgressCallback = (id: string) => {
+        if (!this.progressStates[id]) {
+            throw new Error("File needs to be initialized first");
+        }
+
+        this.progressStates[id].error = true;
         this.reportGlobalProgress();
     };
 

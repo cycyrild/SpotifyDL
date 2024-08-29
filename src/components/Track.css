@@ -1,5 +1,6 @@
 .track-elt {
     --bg-default: rgb(255 255 255 / 40%);
+    --bg-error: rgb(255 0 0 / 25%);
     --bg-complete: rgb(106 172 103 / 50%);
     --bg-in-progress: rgb(255 255 255 / 80%);
     --progress-color: rgb(0 0 255 / 50%);
