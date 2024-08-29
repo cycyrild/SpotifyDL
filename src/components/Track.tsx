@@ -47,7 +47,7 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
         {
             "--progress": `${progress && !progress.finished ? progress.percentageProgress() : 0}%`,
             "--progress-opacity": `${progress && !progress.finished ? 1 : 0}`,
-            "--track-elt-bg": `var(${progress ? (!progress.finished ? "--bg-in-progress" : "--bg-complete") : "--bg-default"})`
+            "--track-elt-bg": `var(${progress ? (!progress.finished ? "--bg-in-progress" : (!progress.error ? "--bg-complete" : "--bg-error")) : "--bg-default"})`
         } as React.CSSProperties;
 
     const handleInfoClick = (event) => {
