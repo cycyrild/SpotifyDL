@@ -1,0 +1,19 @@
+.icon {
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.textError{
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+.error {
+    --padding: 15px;
+    background-color: white;
+    padding: var(--padding);
+    border-radius: var(--padding);
+}
+

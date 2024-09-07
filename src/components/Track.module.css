@@ -1,0 +1,123 @@
+.trackElt {
+    --bgDefault: rgb(255 255 255 / 40%);
+    --bgError: rgb(255 0 0 / 25%);
+    --bgComplete: rgb(106 172 103 / 50%);
+    --bgInProgress: rgb(255 255 255 / 80%);
+    
+    --progressColor: rgb(0 0 255 / 50%);
+    --hoverColor: rgb(255 255 255 / 25%);
+    --trackOpenBg: rgb(0 0 0 / 25%);
+    --btnTrackOpenBg: rgb(60 107 149 / 50%);
+
+    --trackEltHeight: 45px;
+    --trackOpenHeight: 250px;
+
+    --gap: 5px;
+    --open-transiton: ease  250ms;
+
+    height: var(--trackEltHeight);
+    transition: margin-bottom var(--open-transiton);
+    position: relative;
+    width: 100%;
+}
+
+.trackHead {
+    display: flex;
+    gap: var(--gap);
+    background-color: var(--trackHeadBg);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: background-color ease 500ms;
+    width: 100%;
+    height: 100%;
+}
+
+.trackHead::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--progressColor);
+    z-index: -1;
+    transform: translateX(calc(-100% + var(--progress)));
+    transition: transform ease 150ms;
+    opacity: var(--progressOpacity);
+}
+
+.trackHead::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+    transition: background ease 150ms;
+}
+
+.trackHead:hover::after {
+    background: var(--hoverColor);
+}
+
+.trackHead .square {
+    height: 100%;
+    aspect-ratio: 1/1;
+}
+
+.trackHead .trackPrimary {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.trackPrimary .title {
+    font-weight: 800;
+    font-size: calc(var(--trackEltHeight)*0.325);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.trackPrimary .artists {
+    font-size: calc(var(--trackEltHeight)*0.32);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.trackElt.open .trackMoreInfo {
+    transform: scaleY(1);
+}
+
+.trackElt.open {
+    margin-bottom:  var(--trackOpenHeight);
+}
+
+.btn:hover {
+    background-color: var(--hoverColor);
+}
+
+.btn.square.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    transition: background-color ease 250ms;
+}
+
+.open .btn {
+    background-color: var(--btnTrackOpenBg);
+}
+
+.trackMoreInfo {
+    width: 100%;
+    height: var(--trackOpenHeight);
+    transform: scaleY(0);
+    transition: transform var(--open-transiton);
+    background-color: var(--trackOpenBg);
+    transform-origin: top;
+}

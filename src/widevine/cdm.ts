@@ -3,14 +3,14 @@ import forge from 'node-forge';
 import * as licenseProtocol from './license_protocol';
 import { Key } from './key'
 import { DeviceV2 } from './device'
-import { PsshInterface, Pssh } from './pssh'
+import { PsshInterface } from './pssh'
 import Long from 'long';
 import { Writer } from 'protobufjs/minimal';
 import { Buffer } from 'buffer';
 
 const maxUint32 = 0xFFFFFFFF;
 
-class Cdm {
+export class Cdm {
 
     private context: [Buffer, Buffer] | undefined;
 
@@ -148,5 +148,3 @@ class Cdm {
     }
 
 }
-
-export {Cdm};

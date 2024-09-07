@@ -2,7 +2,7 @@ import * as licenseProtocol from './license_protocol';
 import { Buffer } from 'buffer';
 import forge from 'node-forge';
 
-enum DeviceTypes {
+export enum DeviceTypes {
 	CHROME = 1,
 	ANDROID = 2
 }
@@ -20,7 +20,7 @@ export interface DeviceV2 {
 
 const Magic: string = "WVD";
 
-class DeviceV2Parser {
+export class DeviceV2Parser {
 
 
 	private static readRsaPrivateCrt(privateKey: ArrayBuffer): forge.pki.rsa.PrivateKey {
@@ -76,4 +76,3 @@ class DeviceV2Parser {
 	}
 
 }
-export { DeviceV2Parser, DeviceTypes };

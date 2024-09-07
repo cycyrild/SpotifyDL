@@ -1,4 +1,4 @@
-import SpotifyAPI from "./spotify-api/spotify-api"
+import {SpotifyAPI} from "./spotify-api/spotify-api"
 import { DeviceV2Parser, DeviceV2 } from './widevine/device';
 import { Buffer, } from 'buffer';
 import { Pssh } from './widevine/pssh'
@@ -124,26 +124,57 @@ class Downloader {
     return obj;
   }
 
-  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: AudioFormat, saveCallback: (result: DownloadResult) => void): Promise<void> {
+  private async limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+    const results: T[] = [];
+    let currentIndex = 0;
+    let activePromises = 0;
+
+    return new Promise((resolve, reject) => {
+        const enqueue = () => {
+            if (currentIndex === tasks.length && activePromises === 0) {
+                return resolve(results);
+            }
+
+            while (activePromises < limit && currentIndex < tasks.length) {
+                const taskIndex = currentIndex++;
+                activePromises++;
+                tasks[taskIndex]()
+                    .then((result) => {
+                        results[taskIndex] = result;
+                    })
+                    .catch(reject)
+                    .finally(() => {
+                        activePromises--;
+                        enqueue();
+                    });
+            }
+        };
+
+        enqueue();
+    });
+}
+
+
+  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: AudioFormat, maxDownloadConcurency: number, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
     trackIds.forEach(id => {
       this.trackDownloadManager.initializeFile(id);
     });
 
-    const downloadPromises: Promise<TrackData | null>[] = [];
-
+    const downloadPromises: (() => Promise<TrackData | null>)[] = [];
+    
     trackIds.forEach(id => {
-      const downloadPromise = this.DownloadTrack(id, accessToken, downloadFormat)
+      const downloadPromise = () => this.DownloadTrack(id, accessToken, downloadFormat)
         .catch(e => {
           console.error(`Error downloading track ${id}: ${e}`);
           this.trackDownloadManager.errorProgressCallback(id);
           return null;
         });
-
+    
         downloadPromises.push(downloadPromise);
     });
 
-    const downloadedTracks = await Promise.all(downloadPromises);
+    const downloadedTracks = await this.limitedPromiseAll(downloadPromises, maxDownloadConcurency);
 
     const validTracks = downloadedTracks.filter((track): track is TrackData => track !== null);
 

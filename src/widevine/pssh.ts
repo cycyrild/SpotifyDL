@@ -1,6 +1,6 @@
 import * as licenseProtocol from './license_protocol';
 
-interface PsshInterface {
+export interface PsshInterface {
   PsshSize: number;
   PsshHeader: number;
   PsshVersion: number;
@@ -10,7 +10,7 @@ interface PsshInterface {
   psshData: licenseProtocol.WidevinePsshData;
 }
 
-class Pssh {
+export class Pssh {
   static parse(data: Uint8Array): PsshInterface {
     const reader = new DataView(data.buffer);
     let offset = 0;
@@ -72,4 +72,3 @@ class Pssh {
   }
 }
 
-export { Pssh, PsshInterface };
