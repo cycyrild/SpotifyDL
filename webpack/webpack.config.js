@@ -21,8 +21,25 @@ module.exports = (env, argv) => {
         devtool: isProduction ? false : 'source-map',
         module: {
             rules: [
+                // Rule for CSS Modules
+                {
+                    test: /\.module\.css$/i,
+                    use: [
+                        'style-loader',
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                modules: {
+                                    localIdentName: '[name]__[local]___[hash:base64:5]', // Naming pattern for class names
+                                },
+                            },
+                        },
+                    ],
+                },
+                // Rule for regular CSS (global styles)
                 {
                     test: /\.css$/i,
+                    exclude: /\.module\.css$/i, // Exclude CSS Modules
                     use: ['style-loader', 'css-loader'],
                 },
                 {

@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Downloader from '../downloader';
-import { SpotifyAuth } from '../spotifyauth';
+import { getAccessToken } from '../spotifyauth';
 import { UIUpdateCallback, FileProgressStateImpl } from '../utils/download-manager';
-import SpotifyAPI from "../spotify-api/spotify-api";
+import {SpotifyAPI} from "../spotify-api/spotify-api";
 import { TracksCommonFields, MediaType } from '../spotify-api/interfaces';
 
 const useSpotifyData = () => {
@@ -58,7 +58,12 @@ const useSpotifyData = () => {
 
             const downloaderLoadTask = Downloader.create(downloadState);
 
-            const token = await SpotifyAuth.getAccessToken();
+            const token = await getAccessToken();
+
+            if(!token) {
+                throw new Error("Please log in to Spotify to use this extension.");
+            }
+
             spotifyAccessToken.current = token.accessToken;
 
             const medias = getIdFromUrl(url);

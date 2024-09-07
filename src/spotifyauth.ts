@@ -7,51 +7,64 @@ export interface AccessToken {
 
 const SPOTIFY_ACCESS_TOKEN_KEY = 'spotifyAccessToken';
 
-export class SpotifyAuth {
-    private static async fetchAccessToken(): Promise<AccessToken> {
-        const URL = "https://open.spotify.com/get_access_token";
-        const req = await fetch(URL, {
-            credentials: "same-origin",
+async function fetchAccessToken(): Promise<AccessToken> {
+    const URL = "https://open.spotify.com/get_access_token";
+    const response = await fetch(URL, {
+        credentials: "same-origin",
+    });
+    return response.json();
+}
+
+function getAccessTokenFromCache(): Promise<AccessToken | null> {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get([SPOTIFY_ACCESS_TOKEN_KEY], (result) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
+
+            const token: AccessToken = result[SPOTIFY_ACCESS_TOKEN_KEY];
+            if (token && token.accessTokenExpirationTimestampMs > Date.now()) {
+                resolve(token);
+            } else {
+                resolve(null);
+            }
         });
-        const resp: AccessToken = await req.json();
-        return resp;
-    }
+    });
+}
 
-    private static async getAccessTokenFromCache(): Promise<AccessToken | null> {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.get([SPOTIFY_ACCESS_TOKEN_KEY], (result) => {
-                if (chrome.runtime.lastError) {
-                    return reject(chrome.runtime.lastError);
-                }
-
-                const token: AccessToken = result[SPOTIFY_ACCESS_TOKEN_KEY];
-                if (token && token.accessTokenExpirationTimestampMs > Date.now()) {
-                    resolve(token);
-                } else {
-                    resolve(null);
-                }
-            });
+function setAccessTokenInCache(token: AccessToken): Promise<void> {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({ [SPOTIFY_ACCESS_TOKEN_KEY]: token }, () => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
+            resolve();
         });
-    }
+    });
+}
 
-    private static async setAccessTokenInCache(token: AccessToken): Promise<void> {
-        return new Promise((resolve, reject) => {
-            chrome.storage.local.set({ [SPOTIFY_ACCESS_TOKEN_KEY]: token }, () => {
-                if (chrome.runtime.lastError) {
-                    return reject(chrome.runtime.lastError);
-                }
-                resolve();
-            });
-        });
-    }
-
-    public static async getAccessToken(): Promise<AccessToken> {
-        let token = await this.getAccessTokenFromCache();
-        if (!token) {
-            token = await this.fetchAccessToken();
-            await this.setAccessTokenInCache(token);
+export async function getAccessToken(): Promise<AccessToken | null> {
+    let token = await getAccessTokenFromCache();
+    if (!token) {
+        token = await fetchAccessToken();
+        if (token.isAnonymous) {
+            return null;
         }
-        return token;
+        await setAccessTokenInCache(token);
     }
+    return token;
+}
 
+export function removeAccessTokenFromCache(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.remove(SPOTIFY_ACCESS_TOKEN_KEY, () => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
+            resolve();
+        });
+    });
 }

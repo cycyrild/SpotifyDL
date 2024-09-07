@@ -5,43 +5,55 @@ import * as Helpers from '../utils/helpers';
 import { MediaType } from '../spotify-api/interfaces';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleNotch, faCircleExclamation, faStream, faCompactDisc, faMusic, faFile } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faStream, faCompactDisc, faMusic, faFile, faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { TracksCommonFields, } from '../spotify-api/interfaces';
 import { DownloadResult } from '../downloader';
 import { isUpdated } from '../utils/updateCheck';
 import { TrackObjectSimplified } from '../spotify-api/spotify-types';
 import { AudioFormat, AudioFormatUtil } from '../audioformats';
+import * as userSettings from '../utils/userSettings';
+import LoadingComponent from './Loading';
+import ErrorComponent from './Error';
+import { removeAccessTokenFromCache } from '../spotifyauth';
+import SettingsComponent from './Settings';
 
 const App: React.FC = () => {
   const { tracksCommonFields, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
   const [updated, setUpdated] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const bottomStyles = {
     "--progress": `${overallProgress}%`,
-    "--bg-color": remainingItems == 0 ? "var(--bg-1)" : "var(--bg-2)"
+    "--bg-color": !loading && !error ? (remainingItems == 0 ? "var(--bg-ready)" : "var(--bg-progress)") : "var(--bg-disabled)"
   } as React.CSSProperties;
 
-  const [audioQuality, setAudioQuality] = React.useState(AudioFormat.MP4_128_DUAL);
+  const [currentSettings, setSettings] = React.useState(userSettings.defaultSettings);
 
   const chromeDownload = (file: DownloadResult) => {
     Helpers.chromeDownload(file.data, file.metadata.original_title);
   }
 
-  const trackDownload = async (track: TrackObjectSimplified) => {
+  const singleTrackDownload = async (track: TrackObjectSimplified) => {
     if (progressDetails[track.id] && !progressDetails[track.id].complete()) {
       console.log('Download not completed');
       return;
     }
 
     if (spotifyAccessToken.current && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, audioQuality, chromeDownload);
+      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, currentSettings.format, currentSettings.maxDownloadConcurency, chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
   };
 
-  const downloadAll = async () => {
+  const downloadAllTracks = async () => {
+
+    if (loading || error) {
+      console.log('Not ready to download');
+      return;
+    }
+
     if (remainingItems != 0) {
       console.log('Download not completed');
       return;
@@ -49,7 +61,7 @@ const App: React.FC = () => {
 
     if (spotifyAccessToken.current && downloaderRef.current && tracksCommonFields) {
       const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
-      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, audioQuality, chromeDownload);
+      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, currentSettings.format, currentSettings.maxDownloadConcurency,  chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
@@ -59,10 +71,12 @@ const App: React.FC = () => {
     (async () => {
       const updated = await isUpdated();
       setUpdated(updated)
+
+      const settings = await userSettings.loadSettings();
+      setSettings(settings);
     })();
 
   }, []);
-
 
   const getIcon = (type: MediaType) => {
     switch (type) {
@@ -77,33 +91,19 @@ const App: React.FC = () => {
     }
   }
 
+  const reconnect = async () => {
+    await removeAccessTokenFromCache();
+    window.location.reload();
+  }
+
+  const switchOpenSettings = () => {
+    setSettingsOpen(!settingsOpen);
+  }
+
   return (
     <>
       <div className="top top-elt ui-bar">
         <h1>SPOTIFY DL V1</h1>
-      </div>
-
-      <div className='safe-area'>
-        {loading &&
-          <div className='center'>
-            <FontAwesomeIcon
-              icon={faCircleNotch}
-              size="6x"
-              className="spin"
-            />
-          </div>}
-
-        {error &&
-          <div className='center'>
-            <div className='error'>
-              <FontAwesomeIcon
-                icon={faCircleExclamation}
-                size="6x"
-                className='icon'
-              />
-              <pre>{error}</pre>
-            </div>
-          </div>}
       </div>
 
       {tracksCommonFields &&
@@ -115,21 +115,24 @@ const App: React.FC = () => {
 
       <div className='tracks'>
         {tracksCommonFields?.tracks.map((track, index) => (
-          <Track commonFields={tracksCommonFields.commonFields} progress={progressDetails[track.id]} key={index} track={track} onClick={trackDownload} />
+          <Track commonFields={tracksCommonFields.commonFields} progress={progressDetails[track.id]} key={index} track={track} trackPlay={singleTrackDownload} />
         ))}
       </div>
 
-      <div className='bottom-bar ui-bar'>
+      <div className='bottom-bar ui-bar' style={{ cursor: "pointer" }}>
         <div className='bubbles'>
-          <div className='bubble'>
+          <div className={`bubble${settingsOpen ? ' enabled' : ''}`} onClick={switchOpenSettings}>
             <FontAwesomeIcon
-              icon={faFile}
+              icon={faGear}
             />
-            <select value={audioQuality} onChange={(e) => setAudioQuality(e.target.value as AudioFormat)}>
-              {Object.values(AudioFormat).filter(x => AudioFormatUtil.isAAC(x)).map((format, index) => (
-                <option key={index} value={format}>{format}</option>
-              ))}
-            </select>
+            Settings
+          </div>
+
+          <div className='bubble' onClick={reconnect} style={{ cursor: "pointer" }}>
+            <FontAwesomeIcon
+              icon={faArrowsRotate}
+            />
+            Reconnect
           </div>
 
           <div className='bubble'>
@@ -138,7 +141,7 @@ const App: React.FC = () => {
             />
             cyril13600
           </div>
-          
+
           <div className='bubble'>
             <FontAwesomeIcon
               icon={faGithub}
@@ -148,18 +151,26 @@ const App: React.FC = () => {
 
         </div>
 
-        {!loading && !error &&
-          <div className="button" style={bottomStyles} onClick={downloadAll}>
+        <div className="big-button" style={bottomStyles} onClick={downloadAllTracks}>
 
-            <div className="button-section">
-              {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}` : `DOWNLOAD ALL`}
-            </div>
-            <div className="progress"></div>
+          <div className="button-section">
+            {remainingItems != 0 ? `${overallProgress}% - REAMING: ${remainingItems}` : `DOWNLOAD ALL`}
           </div>
-        }
+          <div className="progress"></div>
+        </div>
 
 
         {!updated && <div className='updated'>A new version is available!</div>}
+      </div>
+      <div className='safe-area'>
+        {loading &&
+          <LoadingComponent />}
+
+        {error &&
+          <ErrorComponent error={error} />}
+
+        {settingsOpen &&
+          <SettingsComponent currentSettings={currentSettings} setSettings={setSettings}></SettingsComponent>}
       </div>
     </>
   );

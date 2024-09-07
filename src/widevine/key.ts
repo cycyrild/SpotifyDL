@@ -1,22 +1,21 @@
 import * as forge from 'node-forge';
 import * as licenseProtocol from './license_protocol';
-import { Buffer } from 'buffer';
+//import { v4 as uuidv4, stringify as uuidStringify } from 'uuid';
 
 
 export class Key {
     public license: licenseProtocol.License_KeyContainer_KeyType;
-    public kid: string | null;
+    public kid?: Uint8Array;
     public keyValue: Uint8Array;
-    public permissions: string[];
-
-    constructor(type: licenseProtocol.License_KeyContainer_KeyType, kid: string | null, key: Uint8Array, permissions: string[]) {
+    public trackLabel?: string;
+    private constructor(type: licenseProtocol.License_KeyContainer_KeyType,  key: Uint8Array, kid?: Uint8Array, trackLabel?: string) {
         this.license = type;
         this.kid = kid;
         this.keyValue = key;
-        this.permissions = permissions;
+        this.trackLabel = trackLabel;
     }
 
-    static fromKeyContainer(keyContainer: licenseProtocol.License_KeyContainer, encryptionKey: Uint8Array): Key {
+    public static fromKeyContainer(keyContainer: licenseProtocol.License_KeyContainer, encryptionKey: Uint8Array): Key {
 
         if (!keyContainer.iv || !keyContainer.key) {
             throw new Error('Invalid keyContainer: iv or key is undefined');
@@ -44,11 +43,13 @@ export class Key {
             throw new Error('Invalid keyContainer: type is undefined');
         }
 
+        
+
         return new Key(
             keyContainer.type,
-            null,
             decryptedKey,
-            []
+            keyContainer.id,
+            keyContainer.trackLabel
         );
     }
 }

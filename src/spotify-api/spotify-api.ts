@@ -5,12 +5,7 @@ import { TracksCommonFields, MediaType } from './interfaces'
 
 const PUBLIC_API_URL: string = "https://api.spotify.com/v1";
 
-class SpotifyAPI {
-
-
-    static getTrackGid(trackId: string): string {
-        return Base62.decodeToBigint(trackId).toString(16).padStart(32, "0");
-    }
+export class SpotifyAPI {
 
     private static async fetchWithToken(url: string, accessToken: string, options: RequestInit = {}): Promise<Response> {
         const defaultHeaders = {
@@ -27,6 +22,10 @@ class SpotifyAPI {
         };
 
         return fetch(url, mergedOptions);
+    }
+
+    static getTrackGid(trackId: string): string {
+        return Base62.decodeToBigint(trackId).toString(16).padStart(32, "0");
     }
 
     static async getCoverUrl(fileMetadata: TrackMetadata, imageSize: ImageSize): Promise<string | undefined> {
@@ -155,4 +154,3 @@ class SpotifyAPI {
 
 }
 
-export default SpotifyAPI;

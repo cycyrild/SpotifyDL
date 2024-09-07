@@ -1,26 +1,27 @@
 import React from 'react';
-import './Track.css';
+import * as styles from './Track.module.css';
 import { TrackObjectSimplified, ImageObject, TrackObjectFull } from "../spotify-api/spotify-types";
 import { CommonFields } from '../spotify-api/interfaces';
 import { FileProgressStateImpl } from "../utils/download-manager"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
+import TrackInfo from './TrackInfo';
 
 export interface TrackProps<T extends TrackObjectSimplified> {
     track: T;
     commonFields: CommonFields;
     progress: FileProgressStateImpl | undefined;
-    onClick: (track: T) => Promise<void>;
+    trackPlay: (track: T) => Promise<void>;
 }
 
 
-const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonFields, progress, onClick }) => {
-
-    const isTrackObjectContainAlbum = (track: TrackObjectSimplified | TrackObjectFull): track is TrackObjectFull => {
-        return (track as TrackObjectFull).album !== undefined;
-    };
+const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonFields, progress, trackPlay }) => {
 
     const getImgSrc = () => {
+
+        function isTrackObjectContainAlbum(track: TrackObjectSimplified | TrackObjectFull): track is TrackObjectFull {
+            return (track as TrackObjectFull).album !== undefined;
+        };
 
         function getTinyestImage(images: ImageObject[]) {
             const filtered = images
@@ -46,8 +47,8 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
     const trackEltStyle =
         {
             "--progress": `${progress && !progress.finished ? progress.percentageProgress() : 0}%`,
-            "--progress-opacity": `${progress && !progress.finished ? 1 : 0}`,
-            "--track-elt-bg": `var(${progress ? (!progress.finished ? "--bg-in-progress" : (!progress.error ? "--bg-complete" : "--bg-error")) : "--bg-default"})`
+            "--progressOpacity": `${progress && !progress.finished ? 1 : 0}`,
+            "--trackHeadBg": `var(${progress ? (!progress.finished ? "--bgInProgress" : (!progress.error ? "--bgComplete" : "--bgError")) : "--bgDefault"})`
         } as React.CSSProperties;
 
     const handleInfoClick = (event) => {
@@ -55,28 +56,31 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
         setMoreInfoOpen(!moreInfoOpen);
     };
 
-    return (
-        <div className={"track-elt" + (moreInfoOpen ? ' open' : '')}  >
-            <div className='track-head' onClick={async () => await onClick(track)} style={trackEltStyle}>
-                <img loading='lazy' className="square" src={getImgSrc()} />
 
-                <div className="track-primary">
-                    <div className="title" >
+    return (
+        <div className={`${styles.trackElt} ${moreInfoOpen && styles.open}`} >
+            <div className={styles.trackHead} onClick={async () => await trackPlay(track)} style={trackEltStyle}>
+                <img loading='lazy' className={styles.square} src={getImgSrc()} />
+
+                <div className={styles.trackPrimary}>
+                    <div className={styles.title}>
                         {track.name}
                     </div>
-                    <div className="artists">
+                    <div className={styles.artists}>
                         {trackArtistsStrg}
                     </div>
                 </div>
 
-                {/*<div className="square center" onClick={handleInfoClick}>
+                {/*<div className={`${styles.btn} ${styles.square} ${styles.center}`} onClick={handleInfoClick}>
                     <FontAwesomeIcon icon={faInfo} size='1x' />
-
                 </div>*/}
             </div>
-            <div className='track-more-info'>
+            {/*<div className={styles.trackMoreInfo}>
+                {moreInfoOpen &&
+                    <TrackInfo></TrackInfo>
+                }
+            </div>*/}
 
-            </div>
         </div>
     );
 
