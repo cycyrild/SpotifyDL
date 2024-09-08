@@ -156,7 +156,10 @@ h1 {
     color: ghostwhite;
 }
 
-
+.bubble.btn {
+    cursor: pointer;
+    user-select: none;
+}
 
 .updated {
     text-align: center;
@@ -217,17 +220,5 @@ h2 span {
 .safe-area > * {
     pointer-events: auto;
     width: 80%;
-    margin: auto;
-}
-
-.bubbles > .bubble > select {
-    background-color: transparent;
-    border: none;
-    font-family: inherit;
-    color: inherit;
-    outline: none;
-}
-.bubbles > .bubble > select > option {
-    background: white;
-    color: black;
+    margin: auto auto 2%;
 }

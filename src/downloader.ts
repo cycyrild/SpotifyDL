@@ -1,4 +1,4 @@
-import {SpotifyAPI} from "./spotify-api/spotify-api"
+import { SpotifyAPI } from "./spotify-api/spotify-api"
 import { DeviceV2Parser, DeviceV2 } from './widevine/device';
 import { Buffer, } from 'buffer';
 import { Pssh } from './widevine/pssh'
@@ -6,13 +6,15 @@ import { Cdm } from './widevine/cdm'
 import * as LicenseProtocol from './widevine/license_protocol';
 import * as Metadata from "./spotify-api/metadata";
 import { TrackMetadata } from "./spotify-api/metadata";
-import { FileDownloadData } from "./utils/helpers"
+import { FileDownloadData } from "./utils/fetch-helpers"
 import * as Helpers from "./utils/helpers"
+import * as FetchHelpers from "./utils/fetch-helpers"
 import MP4Tool from "./utils/mp4tool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
 import { AudioFormat, AudioFormatUtil } from "./audioformats";
 import { Writer } from "protobufjs/minimal";
+import { Settings } from "./utils/userSettings"
 
 const DEVICE_URL = 'device.bin';
 
@@ -35,7 +37,7 @@ class Downloader {
   private async loadDependencies() {
     const [mp4Tool, deviceBytes] = await Promise.all([
       MP4Tool.create(),
-      Helpers.fetchAsBuffer(DEVICE_URL)
+      FetchHelpers.fetchAsBuffer(DEVICE_URL)
     ]);
     this.mp4Tool = mp4Tool;
     this.device = DeviceV2Parser.parse(deviceBytes);
@@ -47,7 +49,7 @@ class Downloader {
     return downloader;
   }
 
-  private async DownloadTrack(trackId: string, accessToken: string, downloadFormat: AudioFormat): Promise<TrackData> {
+  private async DownloadTrack(trackId: string, accessToken: string, settings: Settings): Promise<TrackData> {
 
     if (!this.device)
       throw new Error(`CDM device not initialized`);
@@ -66,24 +68,24 @@ class Downloader {
       throw new Error("No download files found");
     }
 
-    const fileToDownload = file.find(x => x.format === downloadFormat);
+    const fileToDownload = file.find(x => x.format === settings.format);
 
     if (!fileToDownload)
-      throw new Error(`No files to download in format ${downloadFormat}`);
+      throw new Error(`No files to download in format ${settings.format}`);
 
     const streamUrl = await SpotifyAPI.getStreamUrl(fileToDownload.file_id, accessToken);
     const coverUrl = await SpotifyAPI.getCoverUrl(metadata, Metadata.ImageSize.DEFAULT);
 
-    const downloadTrackTask = Helpers.fetchUrlAsFileDataProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
+    const downloadTrackTask = FetchHelpers.fetchUrlAsFileDataProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
     let downloadCoverTask: Promise<FileDownloadData<Buffer>> | undefined = undefined;
 
     if (coverUrl) {
-      downloadCoverTask = Helpers.fetchUrlAsFileData(coverUrl);
+      downloadCoverTask = FetchHelpers.fetchUrlAsFileData(coverUrl);
     }
 
     let key: string | undefined;
 
-    if (AudioFormatUtil.isAAC(downloadFormat)) {
+    if (AudioFormatUtil.isAAC(settings.format)) {
       const pssh_b64 = await SpotifyAPI.getPsshB64(fileToDownload.file_id, accessToken);
 
       const pssh_buffer = Buffer.from(pssh_b64, 'base64');;
@@ -94,7 +96,7 @@ class Downloader {
 
       const bytesArray = cdm.getLicenseChallenge(this.device, parsedPssh, LicenseProtocol.LicenseType.STREAMING);
 
-      const widevineLicense = await SpotifyAPI.getWidevineLicense(bytesArray, accessToken);
+      const widevineLicense = await SpotifyAPI.getWidevineLicense(bytesArray, accessToken, settings.retryOptions);
 
       const parsedKeys = await cdm.parseLicenseAndGetKeys(widevineLicense, this.device);
 
@@ -104,7 +106,7 @@ class Downloader {
       key = Helpers.toHexString(parsedKeys[0].keyValue);
     }
     else
-      throw new Error(`Unsupported audio format ${downloadFormat}`);
+      throw new Error(`Unsupported audio format ${settings.format}`);
 
 
     if (!key)
@@ -119,88 +121,66 @@ class Downloader {
       key: key,
       metadata: metadata,
       spotifyId: trackId,
-      audioFormat: downloadFormat
+      audioFormat: settings.format
     };
     return obj;
   }
 
-  private async limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
-    const results: T[] = [];
-    let currentIndex = 0;
-    let activePromises = 0;
 
-    return new Promise((resolve, reject) => {
-        const enqueue = () => {
-            if (currentIndex === tasks.length && activePromises === 0) {
-                return resolve(results);
-            }
-
-            while (activePromises < limit && currentIndex < tasks.length) {
-                const taskIndex = currentIndex++;
-                activePromises++;
-                tasks[taskIndex]()
-                    .then((result) => {
-                        results[taskIndex] = result;
-                    })
-                    .catch(reject)
-                    .finally(() => {
-                        activePromises--;
-                        enqueue();
-                    });
-            }
-        };
-
-        enqueue();
-    });
-}
-
-
-  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, downloadFormat: AudioFormat, maxDownloadConcurency: number, saveCallback: (result: DownloadResult) => void): Promise<void> {
+  async DownloadTrackAndDecrypt(trackIds: Set<string>, accessToken: string, settings: Settings, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
     trackIds.forEach(id => {
       this.trackDownloadManager.initializeFile(id);
     });
 
-    const downloadPromises: (() => Promise<TrackData | null>)[] = [];
-    
+    const downloadPromises: (() => Promise<string|undefined>)[] = [];
+
     trackIds.forEach(id => {
-      const downloadPromise = () => this.DownloadTrack(id, accessToken, downloadFormat)
-        .catch(e => {
+      downloadPromises.push(async () => {
+        try {
+          if (!this.mp4Tool)
+            throw new Error(`ffmpeg not initialized`);
+
+          const track = await this.DownloadTrack(id, accessToken, settings);
+
+
+          const decryptedTrack = await this.mp4Tool.ProcessFiles(track);
+          this.trackDownloadManager.decryptionProgressCallback(track.spotifyId);
+
+          const fileDataBuffer: FileDownloadData<Uint8Array> = {
+            arrayBuffer: decryptedTrack,
+            mimetype: track.trackFiledata.mimetype,
+            extension: track.trackFiledata.extension
+          };
+
+          const elt: DownloadResult = {
+            metadata: track.metadata,
+            data: fileDataBuffer
+          }
+
+          saveCallback(elt);
+
+          this.trackDownloadManager.saveProgressCallback(track.spotifyId);
+
+          return track.spotifyId;
+
+        }
+        catch (e) {
           console.error(`Error downloading track ${id}: ${e}`);
           this.trackDownloadManager.errorProgressCallback(id);
-          return null;
-        });
-    
-        downloadPromises.push(downloadPromise);
+        }
+
+        return undefined;
+      });
     });
 
-    const downloadedTracks = await this.limitedPromiseAll(downloadPromises, maxDownloadConcurency);
+    const downloadedTracks = await Helpers.limitedPromiseAll(downloadPromises, settings.maxDownloadConcurency);
 
-    const validTracks = downloadedTracks.filter((track): track is TrackData => track !== null);
-
-    for (const element of validTracks) {
-      if (!this.mp4Tool)
-        throw new Error(`ffmpeg not initialized`);
-      const buffer = await this.mp4Tool.ProcessFiles(element);
-
-      const fileDataBuffer: FileDownloadData<Uint8Array> = {
-        arrayBuffer: buffer,
-        mimetype: element.trackFiledata.mimetype,
-        extension: element.trackFiledata.extension
-      };
-
-      const elt: DownloadResult = {
-        metadata: element.metadata,
-        data: fileDataBuffer
+    downloadedTracks.forEach(id => {
+      if (id) {
+        this.trackDownloadManager.finishedCallback(id);
       }
-
-      this.trackDownloadManager.decryptionProgressCallback(element.spotifyId);
-
-      saveCallback(elt);
-
-      this.trackDownloadManager.saveProgressCallback(element.spotifyId);
-    }
-
+    });
 
   }
 }

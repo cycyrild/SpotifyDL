@@ -1,6 +1,6 @@
 import { AudioFormat } from "./audioformats";
 import { TrackMetadata } from "./spotify-api/metadata";
-import { FileDownloadData } from "./utils/helpers";
+import { FileDownloadData } from "./utils/fetch-helpers";
 
 export interface TrackData {
   trackFiledata: FileDownloadData<Buffer>;

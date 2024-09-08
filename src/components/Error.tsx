@@ -3,11 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import React from "react"
 
-interface ErrorComponentProps {
+interface CriticalErrorComponentProps {
     error: string;
 }
 
-const ErrorComponent: React.FC<ErrorComponentProps> = ({ error }) => {
+const CriticalErrorComponent: React.FC<CriticalErrorComponentProps> = ({ error }) => {
     return (
         <div className={style.error}>
             <FontAwesomeIcon
@@ -20,4 +20,4 @@ const ErrorComponent: React.FC<ErrorComponentProps> = ({ error }) => {
     )
 };
 
-export default ErrorComponent;
+export default CriticalErrorComponent;

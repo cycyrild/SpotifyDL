@@ -1,6 +1,7 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { TrackMetadata } from '../spotify-api/metadata';
 import { TrackData } from "../trackdata"
+import { Mutex } from 'async-mutex';
 
 
 const FFMPEG_CORE = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.js');
@@ -10,19 +11,25 @@ const FFMPEG_WORKER = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.worker.js');
 class MP4Tool {
 
     private ffmpeg: FFmpeg;
+    private mutex: Mutex;
 
     private constructor(ffmpeg: FFmpeg) {
         this.ffmpeg = ffmpeg;
+        this.mutex = new Mutex();
     }
 
-    static async create(): Promise<MP4Tool> {
+    public static async create(): Promise<MP4Tool> {
         const ffmpeg = new FFmpeg();
-        await ffmpeg.load({
+        const isFirst = await ffmpeg.load({
             coreURL: FFMPEG_CORE,
             wasmURL: FFMPEG_CORE_WASM,
             workerURL: FFMPEG_WORKER
         });
-        return new MP4Tool(ffmpeg);
+
+        if (!isFirst)
+            throw new Error("An instance of MP4Tool has already been initialized");
+        else
+            return new MP4Tool(ffmpeg);
     }
 
     private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string) {
@@ -39,6 +46,8 @@ class MP4Tool {
             '-i', inputFilename
         ];
 
+
+
         if (coverFilename) {
             ffmpegArgs.push(
                 "-i", coverFilename,
@@ -49,6 +58,7 @@ class MP4Tool {
         } else {
             ffmpegArgs.push("-map", "0");
         }
+
 
         const composer = metadata.artist_with_role.find(x => x.role === "ARTIST_ROLE_COMPOSER");
 
@@ -70,10 +80,15 @@ class MP4Tool {
 
         ffmpegArgs.push('-c:a', 'copy', outputFilename);
 
-        let error = await this.ffmpeg.exec(ffmpegArgs);
+        try {
+            const error = await this.ffmpeg.exec(ffmpegArgs);
 
-        if (error != 0) {
-            throw new Error("ffmpeg runtime error");
+            if (error != 0) {
+                throw new Error(`FFmpeg execution failed with code: ${error}`);
+            }
+        } catch (e) {
+            console.error("FFmpeg execution encountered an error:", e);
+            throw new Error(`FFmpeg runtime error: ${e.messag}`);
         }
     }
 
@@ -82,29 +97,40 @@ class MP4Tool {
         let audioInputFilename: string;
         let audioOutputFilename: string;
 
-        audioOutputFilename = `A${track.metadata.gid}.${track.trackFiledata.extension}`;
-        audioInputFilename = `B${track.metadata.gid}.${track.trackFiledata.extension}`;
+        audioOutputFilename = `A${track.spotifyId}.${track.trackFiledata.extension}`;
+        audioInputFilename = `B${track.spotifyId}.${track.trackFiledata.extension}`;
 
-        await this.ffmpeg.writeFile(audioInputFilename, track.trackFiledata.arrayBuffer);
 
-        if (track.coverFileData) {
-            coverFilename = `${track.metadata.gid}.${track.coverFileData.extension}`;
-            await this.ffmpeg.writeFile(coverFilename, track.coverFileData.arrayBuffer);
-        }
+        return await this.mutex.runExclusive(async () => {
+            await this.ffmpeg.writeFile(audioInputFilename, track.trackFiledata.arrayBuffer);
 
-        await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.key);
+            if (track.coverFileData) {
+                coverFilename = `C${track.spotifyId}.${track.coverFileData.extension}`;
+                await this.ffmpeg.writeFile(coverFilename, track.coverFileData.arrayBuffer);
+            }
 
-        const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
+            await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.key);
 
-        if (!(decryptedFile instanceof Uint8Array)) {
-            throw new Error("Inconsistent ffmpeg return type");
-        }
+            const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
 
-        this.ffmpeg.deleteFile(audioOutputFilename);
-        this.ffmpeg.deleteFile(audioInputFilename);
+            if (!(decryptedFile instanceof Uint8Array)) {
+                throw new Error("Inconsistent ffmpeg return type");
+            }
 
-        return decryptedFile;
+            await this.ffmpeg.deleteFile(audioOutputFilename);
+            await this.ffmpeg.deleteFile(audioInputFilename);
+
+            if (coverFilename) {
+                await this.ffmpeg.deleteFile(coverFilename);
+            }
+
+            return decryptedFile;
+        });
+
+
+
     }
+
 }
 
 export default MP4Tool;
