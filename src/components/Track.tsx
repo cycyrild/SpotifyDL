@@ -46,9 +46,9 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
 
     const trackEltStyle =
         {
-            "--progress": `${progress && !progress.finished ? progress.percentageProgress() : 0}%`,
-            "--progressOpacity": `${progress && !progress.finished ? 1 : 0}`,
-            "--trackHeadBg": `var(${progress ? (!progress.finished ? "--bgInProgress" : (!progress.error ? "--bgComplete" : "--bgError")) : "--bgDefault"})`
+            "--progress": `${progress && !progress.complete() ? progress.percentageProgress() : 0}%`,
+            "--progressOpacity": `${progress && !progress.complete() ? 1 : 0}`,
+            "--trackHeadBg": `var(${progress ? (!progress.complete() ? "--bgInProgress" : (!progress.error ? "--bgComplete" : "--bgError")) : "--bgDefault"})`
         } as React.CSSProperties;
 
     const handleInfoClick = (event) => {
@@ -58,7 +58,7 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
 
 
     return (
-        <div className={`${styles.trackElt} ${moreInfoOpen && styles.open}`} >
+        <div className={`${styles.trackElt} ${moreInfoOpen ? styles.open : ''}`} >
             <div className={styles.trackHead} onClick={async () => await trackPlay(track)} style={trackEltStyle}>
                 <img loading='lazy' className={styles.square} src={getImgSrc()} />
 

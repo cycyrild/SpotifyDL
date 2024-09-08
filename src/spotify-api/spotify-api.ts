@@ -2,12 +2,14 @@ import * as Base62 from "./base62";
 import { ImageSize, TrackMetadata } from "./metadata";
 import { TrackObjectSimplified, PagingObject, PlaylistTrackObject, PlaylistObjectFull, AlbumObjectFull, TrackObjectFull } from "./spotify-types";
 import { TracksCommonFields, MediaType } from './interfaces'
+import { fetchWithRetry } from "../utils/fetch-helpers";
+import { RetryOptions } from "../utils/userSettings";
 
 const PUBLIC_API_URL: string = "https://api.spotify.com/v1";
 
 export class SpotifyAPI {
 
-    private static async fetchWithToken(url: string, accessToken: string, options: RequestInit = {}): Promise<Response> {
+    private static async fetchWithToken(url: string, accessToken: string, retryOptions?: RetryOptions, options: RequestInit = {}): Promise<Response> {
         const defaultHeaders = {
             authorization: `Bearer ${accessToken}`,
             accept: "application/json",
@@ -21,7 +23,10 @@ export class SpotifyAPI {
             }
         };
 
-        return fetch(url, mergedOptions);
+        if (retryOptions === undefined) {
+            return fetch(url, mergedOptions);
+        }
+        return fetchWithRetry(url, retryOptions, mergedOptions);
     }
 
     static getTrackGid(trackId: string): string {
@@ -63,7 +68,7 @@ export class SpotifyAPI {
         return req.json().then(x => x.cdnurl[0]);
     }
 
-    static async getWidevineLicense(challenge: ArrayBuffer, accessToken: string): Promise<Uint8Array> {
+    static async getWidevineLicense(challenge: ArrayBuffer, accessToken: string, retryOptions: RetryOptions): Promise<Uint8Array> {
         const url = 'https://gue1-spclient.spotify.com/widevine-license/v1/audio/license';
         const options: RequestInit = {
             method: 'POST',
@@ -73,7 +78,7 @@ export class SpotifyAPI {
             }
         };
 
-        const response = await this.fetchWithToken(url, accessToken, options);
+        const response = await this.fetchWithToken(url, accessToken, retryOptions, options);
         const data = await response.arrayBuffer();
         return new Uint8Array(data);
     }
@@ -82,28 +87,28 @@ export class SpotifyAPI {
         const url = `${PUBLIC_API_URL}/playlists/${albumId}`;
         const playlistData = await this.fetchWithToken(url, accessToken);
         const playlistJson: PlaylistObjectFull = await playlistData.json();
-    
+
         let tracks: PlaylistTrackObject[] = playlistJson.tracks.items;
         let next = playlistJson.tracks.next;
-    
+
         while (next) {
             const nextPage = await this.fetchWithToken(next, accessToken);
-            const nextPageJson:PagingObject<PlaylistTrackObject> = await nextPage.json();
+            const nextPageJson: PagingObject<PlaylistTrackObject> = await nextPage.json();
             tracks = tracks.concat(nextPageJson.items);
             next = nextPageJson.next;
         }
-    
+
         const filteredTracks = tracks.map(x => x.track).filter(x => x) as TrackObjectFull[];
-    
+
         const res: TracksCommonFields = {
             tracks: filteredTracks,
             commonFields: {
                 name: playlistJson.name,
-                images : playlistJson.images,
+                images: playlistJson.images,
                 type: MediaType.Playlist
             }
         }
-    
+
         return res;
     }
 
@@ -113,11 +118,11 @@ export class SpotifyAPI {
         const albumJson: AlbumObjectFull = await albumData.json();
         let tracks: TrackObjectSimplified[] = albumJson.tracks.items;
         let next = albumJson.tracks.next;
-    
+
         while (next) {
             const nextPage = await this.fetchWithToken(next, accessToken);
             const nextPageJson: PagingObject<TrackObjectSimplified> = await nextPage.json();
-            
+
             tracks = tracks.concat(nextPageJson.items);
             next = nextPageJson.next;
         }
@@ -126,11 +131,11 @@ export class SpotifyAPI {
             tracks: tracks,
             commonFields: {
                 name: albumJson.name,
-                images : albumJson.images,
+                images: albumJson.images,
                 type: MediaType.Album
             }
         }
-    
+
         return res;
     }
 
@@ -143,7 +148,7 @@ export class SpotifyAPI {
             tracks: [trackDataJson],
             commonFields: {
                 name: trackDataJson.name,
-                images : trackDataJson.album.images,
+                images: trackDataJson.album.images,
                 type: MediaType.Track
             }
         }

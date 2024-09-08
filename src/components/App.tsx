@@ -14,18 +14,18 @@ import { TrackObjectSimplified } from '../spotify-api/spotify-types';
 import { AudioFormat, AudioFormatUtil } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
 import LoadingComponent from './Loading';
-import ErrorComponent from './Error';
+import CriticalErrorComponent from './Error';
 import { removeAccessTokenFromCache } from '../spotifyauth';
 import SettingsComponent from './Settings';
 
 const App: React.FC = () => {
-  const { tracksCommonFields, spotifyAccessToken, loading, downloaderRef, overallProgress, remainingItems, progressDetails, error } = useSpotifyData();
+  const { tracksCommonFields, spotifyAccessToken, loading: loadingShow, downloaderRef, overallProgress, remainingItems, progressDetails, error: errorShow } = useSpotifyData();
   const [updated, setUpdated] = React.useState(false);
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [settingsShow, setSettingsOpen] = React.useState(false);
 
   const bottomStyles = {
     "--progress": `${overallProgress}%`,
-    "--bg-color": !loading && !error ? (remainingItems == 0 ? "var(--bg-ready)" : "var(--bg-progress)") : "var(--bg-disabled)"
+    "--bg-color": !loadingShow && !errorShow ? (remainingItems == 0 ? "var(--bg-ready)" : "var(--bg-progress)") : "var(--bg-disabled)"
   } as React.CSSProperties;
 
   const [currentSettings, setSettings] = React.useState(userSettings.defaultSettings);
@@ -41,7 +41,7 @@ const App: React.FC = () => {
     }
 
     if (spotifyAccessToken.current && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, currentSettings.format, currentSettings.maxDownloadConcurency, chromeDownload);
+      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, currentSettings, chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
   const downloadAllTracks = async () => {
 
-    if (loading || error) {
+    if (loadingShow || errorShow) {
       console.log('Not ready to download');
       return;
     }
@@ -61,7 +61,7 @@ const App: React.FC = () => {
 
     if (spotifyAccessToken.current && downloaderRef.current && tracksCommonFields) {
       const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
-      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, currentSettings.format, currentSettings.maxDownloadConcurency,  chromeDownload);
+      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, currentSettings, chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
@@ -97,7 +97,7 @@ const App: React.FC = () => {
   }
 
   const switchOpenSettings = () => {
-    setSettingsOpen(!settingsOpen);
+    setSettingsOpen(!settingsShow);
   }
 
   return (
@@ -119,16 +119,16 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      <div className='bottom-bar ui-bar' style={{ cursor: "pointer" }}>
+      <div className='bottom-bar ui-bar'>
         <div className='bubbles'>
-          <div className={`bubble${settingsOpen ? ' enabled' : ''}`} onClick={switchOpenSettings}>
+          <div className={`bubble btn${settingsShow ? ' enabled' : ''}`} onClick={switchOpenSettings} style={{ cursor: "pointer" }}>
             <FontAwesomeIcon
               icon={faGear}
             />
             Settings
           </div>
 
-          <div className='bubble' onClick={reconnect} style={{ cursor: "pointer" }}>
+          <div className='bubble btn' onClick={reconnect} style={{ cursor: "pointer" }}>
             <FontAwesomeIcon
               icon={faArrowsRotate}
             />
@@ -163,14 +163,16 @@ const App: React.FC = () => {
         {!updated && <div className='updated'>A new version is available!</div>}
       </div>
       <div className='safe-area'>
-        {loading &&
+        {loadingShow &&
           <LoadingComponent />}
 
-        {error &&
-          <ErrorComponent error={error} />}
+        {errorShow &&
+          <CriticalErrorComponent error={errorShow} />}
 
-        {settingsOpen &&
+        {settingsShow &&
           <SettingsComponent currentSettings={currentSettings} setSettings={setSettings}></SettingsComponent>}
+
+        
       </div>
     </>
   );

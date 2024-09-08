@@ -1,4 +1,4 @@
-import { ProgressCallback } from "./helpers";
+import { ProgressCallback } from "./fetch-helpers";
 
 export type UIUpdateCallback = (
     overallProgress: number,
@@ -87,19 +87,22 @@ export class TrackDownloadManager {
         this.reportGlobalProgress();
     };
 
+    public finishedCallback = (id: string) => {
+        if (!this.progressStates[id]) {
+            throw new Error("File needs to be initialized first");
+        }
+
+        this.progressStates[id].finished = true;
+        this.reportGlobalProgress();
+    }
+
     private reportGlobalProgress() {
-        const activeStates = Object.values(this.progressStates).filter(state => !state.finished);
+        const activeStates = Object.values(this.progressStates).filter(state => !state.finished && !state.error);
 
         const totalProgress = activeStates.reduce((sum, state) => sum + state.progress(), 0);
         const totalCount = activeStates.length;
         const overallProgress = totalCount > 0 ? (totalProgress / totalCount * 100).toFixed(2) : '0.00';
         const remainingItems = activeStates.filter(state => !state.complete()).length;
-
-        Object.values(this.progressStates).forEach(state => {
-            if (state.complete() && !state.finished) {
-                state.finished = true;
-            }
-        });
 
         this.uiUpdateCallback(parseFloat(overallProgress), remainingItems, this.progressStates);
     }
