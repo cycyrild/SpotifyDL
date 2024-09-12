@@ -16,7 +16,7 @@ import { AudioFormat, AudioFormatUtil } from "./audioformats";
 import { Writer } from "protobufjs/minimal";
 import { Settings } from "./utils/userSettings"
 
-const DEVICE_URL = 'device.bin';
+const DEVICE_URL = 'device.wvd';
 
 export interface DownloadResult {
   metadata: TrackMetadata;

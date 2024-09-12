@@ -10,7 +10,7 @@ export type FileDownloadData<T> = {
     extension: string;
 };
 
-export async function fetchWithRetry(url: string, retryOptions: RetryOptions, init?: RequestInit ): Promise<Response> {
+export async function fetchWithRetry(url: string, retryOptions: RetryOptions, init?: RequestInit): Promise<Response> {
     for (let attempt = 0; attempt <= retryOptions.retries; attempt++) {
         try {
             const response = await fetch(url, init);
@@ -23,9 +23,9 @@ export async function fetchWithRetry(url: string, retryOptions: RetryOptions, in
             } else if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response; // Réponse réussie, retourne le résultat
+            return response;
         } catch (error) {
-            if (attempt === retryOptions.retries) {
+            if (attempt === retryOptions.retries || !(error instanceof Error) || (error.message && !error.message.includes('429'))) {
                 throw new Error(`Failed to fetch ${url} after ${retryOptions.retries + 1} attempts: ${(error as Error).message}`);
             }
 
@@ -37,6 +37,7 @@ export async function fetchWithRetry(url: string, retryOptions: RetryOptions, in
 
     throw new Error(`Unreachable code: Should never reach here without returning a response or throwing an error`);
 }
+
 
 
 export async function fetchAsBufferProgress(url: string, downloadId: string, onProgress: ProgressCallback): Promise<Buffer> {
