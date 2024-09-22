@@ -13,8 +13,7 @@ export interface DeviceV2 {
 	SecurityLevel: number;
 	Flags: number;
 	PrivateKey: Buffer;
-	ClientId: Buffer;
-	ClientIdDecoded: licenseProtocol.ClientIdentification;
+	ClientId: licenseProtocol.ClientIdentification;
 	RsaPrivateCrt: forge.pki.rsa.PrivateKey;
 }
 
@@ -69,8 +68,7 @@ export class DeviceV2Parser {
 			SecurityLevel: securityLevel,
 			Flags: flags,
 			RsaPrivateCrt: rsaPrivateCrt,
-			ClientId: clientId,
-			ClientIdDecoded: clientIdDecoded,
+			ClientId: clientIdDecoded,
 			PrivateKey: privateKey
 		};
 	}
