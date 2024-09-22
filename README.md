@@ -1,5 +1,8 @@
 # SpotifyDL Chrome Extension
 
+### ‼️ Doesn't work anymore. All widevine avd dumps revoked. ‼️
+Working on a workaround... 
+
 ## Description
 Allows users to download track, playlist or album Spotify from the browser.
 
