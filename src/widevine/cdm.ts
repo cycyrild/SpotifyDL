@@ -111,7 +111,7 @@ export class Cdm {
 
 
         const lr: licenseProtocol.LicenseRequest = {
-            clientId: device.ClientIdDecoded,
+            clientId: device.ClientId,
             contentId: {
                 widevinePsshData: {
                     licenseType: licenseType,
