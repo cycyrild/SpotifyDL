@@ -1,13 +1,15 @@
 # SpotifyDL Chrome Extension
 
-### ‼️ Doesn't work anymore. All widevine avd dumps revoked. ‼️
-Working on a workaround... 
-
 ## Description
 Allows users to download track, playlist or album Spotify from the browser.
 
-- Using Widevine CDM: Implements Widevine's Content Decryption Module (CDM) to obtain track decryption keys.
-- Integrated decryption of the protected file and addition of MP4 metadata with FFmpeg WASM.
+- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**.
+
+- Using **Widevine CDM** for **AAC (128, 256 Kbits/s)**.
+
+- **Integrated decryption** of the protected file and addition of metadata with **FFmpeg WASM**.
+
+Widevine decryption **Requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
 
 <img src="img1.png" style="width:700px;"/>
 
