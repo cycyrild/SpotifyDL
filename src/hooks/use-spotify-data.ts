@@ -56,7 +56,7 @@ const useSpotifyData = () => {
                 throw new Error("Unable to retrieve current URL.");
             }
 
-            const downloaderLoadTask = Downloader.create(downloadState);
+            const downloaderLoadTask = Downloader.Create(downloadState);
 
             const token = await getAccessToken();
 

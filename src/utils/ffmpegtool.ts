@@ -8,7 +8,7 @@ const FFMPEG_CORE = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.js');
 const FFMPEG_CORE_WASM = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.wasm');
 const FFMPEG_WORKER = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.worker.js');
 
-class MP4Tool {
+class FFMPEGTool {
 
     private ffmpeg: FFmpeg;
     private mutex: Mutex;
@@ -18,7 +18,7 @@ class MP4Tool {
         this.mutex = new Mutex();
     }
 
-    public static async create(): Promise<MP4Tool> {
+    public static async create(): Promise<FFMPEGTool> {
         const ffmpeg = new FFmpeg();
         const isFirst = await ffmpeg.load({
             coreURL: FFMPEG_CORE,
@@ -26,13 +26,17 @@ class MP4Tool {
             workerURL: FFMPEG_WORKER
         });
 
+        ffmpeg.on('log', ({ message }) => {
+            console.log(message);
+        });
+
         if (!isFirst)
-            throw new Error("An instance of MP4Tool has already been initialized");
+            throw new Error("An instance of ffmpeg has already been initialized");
         else
-            return new MP4Tool(ffmpeg);
+            return new FFMPEGTool(ffmpeg);
     }
 
-    private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string) {
+    private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string | undefined) {
 
         function convertToISO8601(date) {
             const year = date.year;
@@ -41,12 +45,12 @@ class MP4Tool {
             return `${year}-${month}-${day}`;
         }
 
-        let ffmpegArgs = [
-            '-decryption_key', decryptionKey,
-            '-i', inputFilename
-        ];
+        let ffmpegArgs: string[] = [];
 
+        if (decryptionKey)
+            ffmpegArgs.push('-decryption_key', decryptionKey);
 
+        ffmpegArgs.push('-i', inputFilename);
 
         if (coverFilename) {
             ffmpegArgs.push(
@@ -92,24 +96,24 @@ class MP4Tool {
         }
     }
 
-    public async ProcessFiles(track: TrackData) {
+    public async ProcessFiles(track: TrackData, audioContainer: string) {
         let coverFilename: string | undefined;
         let audioInputFilename: string;
         let audioOutputFilename: string;
 
-        audioOutputFilename = `A${track.spotifyId}.${track.trackFiledata.extension}`;
-        audioInputFilename = `B${track.spotifyId}.${track.trackFiledata.extension}`;
+        audioOutputFilename = `A${track.spotifyId}.${audioContainer}`;
+        audioInputFilename = `B${track.spotifyId}`;
 
 
         return await this.mutex.runExclusive(async () => {
-            await this.ffmpeg.writeFile(audioInputFilename, track.trackFiledata.arrayBuffer);
+            await this.ffmpeg.writeFile(audioInputFilename, track.trackFiledata);
 
             if (track.coverFileData) {
-                coverFilename = `C${track.spotifyId}.${track.coverFileData.extension}`;
-                await this.ffmpeg.writeFile(coverFilename, track.coverFileData.arrayBuffer);
+                coverFilename = `C${track.spotifyId}`;
+                await this.ffmpeg.writeFile(coverFilename, track.coverFileData);
             }
 
-            await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.key);
+            await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.ffmpegDecryptionKey);
 
             const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
 
@@ -133,4 +137,4 @@ class MP4Tool {
 
 }
 
-export default MP4Tool;
+export default FFMPEGTool;

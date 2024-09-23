@@ -1,33 +1,38 @@
 import { SpotifyAPI } from "./spotify-api/spotify-api"
 import { DeviceV2Parser, DeviceV2 } from './widevine/device';
 import { Buffer, } from 'buffer';
-import { Pssh } from './widevine/pssh'
-import { Cdm } from './widevine/cdm'
-import * as LicenseProtocol from './widevine/license_protocol';
+
 import * as Metadata from "./spotify-api/metadata";
 import { TrackMetadata } from "./spotify-api/metadata";
-import { FileDownloadData } from "./utils/fetch-helpers"
-import * as Helpers from "./utils/helpers"
+//import { FileDownloadData } from "./utils/fetch-helpers"
 import * as FetchHelpers from "./utils/fetch-helpers"
-import MP4Tool from "./utils/mp4tool";
+import FFMPEGTool from "./utils/ffmpegtool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
 import { AudioFormat, AudioFormatUtil } from "./audioformats";
-import { Writer } from "protobufjs/minimal";
 import { Settings } from "./utils/userSettings"
+import * as PlayPlayHelper from "./playplay_helper"
+import * as WidevineHelper from "./widevine_helper"
+
+import { PlayPlayDecrypt } from "./playplay/playplayDecrypt";
+import * as Helpers from "./utils/helpers"
+import * as Ogg from "./audiofix/ogg"
 
 const DEVICE_URL = 'device.wvd';
 
 export interface DownloadResult {
   metadata: TrackMetadata;
-  data: FileDownloadData<Uint8Array>;
+  data: Uint8Array;
+  extension: string;
 };
 
 class Downloader {
 
-  private mp4Tool?: MP4Tool;
+  private ffmpegTool?: FFMPEGTool;
   private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
+  private playplayDecrypt?: PlayPlayDecrypt;
+
 
   private constructor(uiUpdateCallback: UIUpdateCallback) {
 
@@ -35,24 +40,23 @@ class Downloader {
   }
 
   private async loadDependencies() {
-    const [mp4Tool, deviceBytes] = await Promise.all([
-      MP4Tool.create(),
-      FetchHelpers.fetchAsBuffer(DEVICE_URL)
+    const [ffmpegTool, deviceBytes, playplayDecrypt] = await Promise.all([
+      FFMPEGTool.create(),
+      FetchHelpers.fetchAsBuffer(DEVICE_URL),
+      PlayPlayDecrypt.load()
     ]);
-    this.mp4Tool = mp4Tool;
+    this.ffmpegTool = ffmpegTool;
     this.device = DeviceV2Parser.parse(deviceBytes);
+    this.playplayDecrypt = playplayDecrypt;
   }
 
-  static async create(uiUpdateCallback: UIUpdateCallback): Promise<Downloader> {
+  static async Create(uiUpdateCallback: UIUpdateCallback): Promise<Downloader> {
     const downloader = new Downloader(uiUpdateCallback);
     await downloader.loadDependencies();
     return downloader;
   }
 
   private async DownloadTrack(trackId: string, accessToken: string, settings: Settings): Promise<TrackData> {
-
-    if (!this.device)
-      throw new Error(`CDM device not initialized`);
 
     const gid = SpotifyAPI.getTrackGid(trackId);
 
@@ -76,41 +80,31 @@ class Downloader {
     const streamUrl = await SpotifyAPI.getStreamUrl(fileToDownload.file_id, accessToken);
     const coverUrl = await SpotifyAPI.getCoverUrl(metadata, Metadata.ImageSize.DEFAULT);
 
-    const downloadTrackTask = FetchHelpers.fetchUrlAsFileDataProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-    let downloadCoverTask: Promise<FileDownloadData<Buffer>> | undefined = undefined;
+    let downloadTrackTask: Promise<Buffer> | undefined = undefined;
+    let downloadCoverTask: Promise<Buffer> | undefined = undefined;
 
     if (coverUrl) {
-      downloadCoverTask = FetchHelpers.fetchUrlAsFileData(coverUrl);
+      downloadCoverTask = FetchHelpers.fetchAsBuffer(coverUrl);
     }
 
-    let key: string | undefined;
+    let ffmpegDecryptionKey: string | undefined;
+    let aesDecryptionKey: string | undefined;
 
     if (AudioFormatUtil.isAAC(settings.format)) {
-      const pssh_b64 = await SpotifyAPI.getPsshB64(fileToDownload.file_id, accessToken);
-
-      const pssh_buffer = Buffer.from(pssh_b64, 'base64');;
-
-      const parsedPssh = Pssh.parse(pssh_buffer);
-
-      const cdm = new Cdm();
-
-      const bytesArray = cdm.getLicenseChallenge(this.device, parsedPssh, LicenseProtocol.LicenseType.STREAMING);
-
-      const widevineLicense = await SpotifyAPI.getWidevineLicense(bytesArray, accessToken, settings.retryOptions);
-
-      const parsedKeys = await cdm.parseLicenseAndGetKeys(widevineLicense, this.device);
-
-      if (parsedKeys.length == 0)
-        throw new Error(`No keys found by the content decryption module`);
-
-      key = Helpers.toHexString(parsedKeys[0].keyValue);
+      if(!this.device)
+        throw new Error(`Widevine device not initialized`);
+      downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
+      ffmpegDecryptionKey = await WidevineHelper.getKey(fileToDownload.file_id, accessToken, this.device, settings.retryOptions);
+    }
+    else if (AudioFormatUtil.isVorbis(settings.format)) {
+      if(!this.playplayDecrypt)
+        throw new Error(`PlayPlay decrypt not initialized`);
+      downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
+      aesDecryptionKey = await PlayPlayHelper.getKey(fileToDownload.file_id, accessToken, this.playplayDecrypt, settings.retryOptions);
     }
     else
       throw new Error(`Unsupported audio format ${settings.format}`);
 
-
-    if (!key)
-      throw new Error(`No key found for track ${trackId}`);
 
     const trackFiledata = await downloadTrackTask;
     const coverFileData = await downloadCoverTask;
@@ -118,7 +112,8 @@ class Downloader {
     const obj: TrackData = {
       trackFiledata: trackFiledata,
       coverFileData: coverFileData,
-      key: key,
+      ffmpegDecryptionKey: ffmpegDecryptionKey,
+      aesDecryptionKey: aesDecryptionKey,
       metadata: metadata,
       spotifyId: trackId,
       audioFormat: settings.format
@@ -133,29 +128,32 @@ class Downloader {
       this.trackDownloadManager.initializeFile(id);
     });
 
-    const downloadPromises: (() => Promise<string|undefined>)[] = [];
+    const downloadPromises: (() => Promise<string | undefined>)[] = [];
 
     trackIds.forEach(id => {
       downloadPromises.push(async () => {
         try {
-          if (!this.mp4Tool)
+          if (!this.ffmpegTool)
             throw new Error(`ffmpeg not initialized`);
 
           const track = await this.DownloadTrack(id, accessToken, settings);
 
+          if(!track.aesDecryptionKey && !track.ffmpegDecryptionKey)
+            throw new Error(`No decryption key found`);
 
-          const decryptedTrack = await this.mp4Tool.ProcessFiles(track);
-          this.trackDownloadManager.decryptionProgressCallback(track.spotifyId);
+          if(track.aesDecryptionKey)
+            track.trackFiledata = await PlayPlayHelper.decipherData(track.trackFiledata, track.aesDecryptionKey);
 
-          const fileDataBuffer: FileDownloadData<Uint8Array> = {
-            arrayBuffer: decryptedTrack,
-            mimetype: track.trackFiledata.mimetype,
-            extension: track.trackFiledata.extension
-          };
+          if (AudioFormatUtil.isVorbis(settings.format))
+            Ogg.rebuildOgg(track.trackFiledata);
+
+          const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, settings.outputAudioContainer);
+          this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
 
           const elt: DownloadResult = {
             metadata: track.metadata,
-            data: fileDataBuffer
+            data: decryptedTrack,
+            extension: settings.outputAudioContainer
           }
 
           saveCallback(elt);

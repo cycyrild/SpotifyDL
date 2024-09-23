@@ -1,14 +1,6 @@
-import { fileTypeFromBuffer, FileTypeResult } from 'file-type';
-
 export type ProgressCallback = (loaded: number, total: number, id: string) => void;
 import { Buffer } from 'buffer';
 import { RetryOptions } from './userSettings';
-
-export type FileDownloadData<T> = {
-    arrayBuffer: T;
-    mimetype: string;
-    extension: string;
-};
 
 export async function fetchWithRetry(url: string, retryOptions: RetryOptions, init?: RequestInit): Promise<Response> {
     for (let attempt = 0; attempt <= retryOptions.retries; attempt++) {
@@ -37,8 +29,6 @@ export async function fetchWithRetry(url: string, retryOptions: RetryOptions, in
 
     throw new Error(`Unreachable code: Should never reach here without returning a response or throwing an error`);
 }
-
-
 
 export async function fetchAsBufferProgress(url: string, downloadId: string, onProgress: ProgressCallback): Promise<Buffer> {
     const response = await fetch(url);
@@ -84,40 +74,4 @@ export async function fetchAsBuffer(url: string): Promise<Buffer> {
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     return buffer;
-}
-
-export async function fetchUrlAsFileDataProgress(url: string, downloadId: string, onProgress: ProgressCallback): Promise<FileDownloadData<Buffer>> {
-    const buffer = await fetchAsBufferProgress(url, downloadId, onProgress);
-
-    const fileType: FileTypeResult | undefined = await fileTypeFromBuffer(buffer);
-
-    let mimetype: string | null = null;
-    let extension: string | null = null;
-
-    if (fileType) {
-        mimetype = fileType.mime;
-        extension = fileType.ext;
-    } else {
-        throw new Error(`No mimetype found for ${url}`);
-    }
-
-    return { arrayBuffer: buffer, mimetype, extension };
-}
-
-export async function fetchUrlAsFileData(url: string): Promise<FileDownloadData<Buffer>> {
-    const buffer = await fetchAsBuffer(url);
-
-    const fileType: FileTypeResult | undefined = await fileTypeFromBuffer(buffer);
-
-    let mimetype: string | null = null;
-    let extension: string | null = null;
-
-    if (fileType) {
-        mimetype = fileType.mime;
-        extension = fileType.ext;
-    } else {
-        throw new Error(`No mimetype found for ${url}`);
-    }
-
-    return { arrayBuffer: buffer, mimetype, extension };
 }

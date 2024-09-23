@@ -7,6 +7,7 @@ export interface Settings {
     format: AudioFormat;
     maxDownloadConcurency: number;
     retryOptions: RetryOptions;
+    outputAudioContainer: string;
 }
 
 export interface RetryOptions {
@@ -17,22 +18,28 @@ export interface RetryOptions {
 function isValidSettings(settings: any): settings is Settings {
     return (
         settings &&
+        typeof settings === 'object' &&
         Object.values(AudioFormat).includes(settings.format) &&
         typeof settings.maxDownloadConcurency === 'number' &&
+        settings.maxDownloadConcurency > 0 &&
         settings.retryOptions &&
         typeof settings.retryOptions === 'object' &&
         typeof settings.retryOptions.retries === 'number' &&
-        typeof settings.retryOptions.delay === 'number'
+        settings.retryOptions.retries >= 0 &&
+        typeof settings.retryOptions.delay === 'number' &&
+        settings.retryOptions.delay >= 0 &&
+        typeof settings.outputAudioContainer === 'string'
     );
 }
 
 export const defaultSettings: Settings = {
-    format: AudioFormat.MP4_128,
-    maxDownloadConcurency: 1,
+    format: AudioFormat.OGG_VORBIS_160,
+    maxDownloadConcurency: 5,
     retryOptions: {
         retries: 5,
         delay: 2500
-    }
+    },
+    outputAudioContainer: 'mka'
 };
 
 

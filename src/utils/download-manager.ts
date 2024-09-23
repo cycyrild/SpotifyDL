@@ -60,7 +60,7 @@ export class TrackDownloadManager {
         this.reportGlobalProgress();
     };
 
-    public decryptionProgressCallback = (id: string) => {
+    public encodingProgressCallback = (id: string) => {
         if (!this.progressStates[id]) {
             throw new Error("File needs to be initialized first");
         }

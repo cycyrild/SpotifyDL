@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const [currentSettings, setSettings] = React.useState(userSettings.defaultSettings);
 
   const chromeDownload = (file: DownloadResult) => {
-    Helpers.chromeDownload(file.data, file.metadata.original_title);
+    Helpers.chromeDownload(file.data, file.extension, file.metadata.original_title);
   }
 
   const singleTrackDownload = async (track: TrackObjectSimplified) => {

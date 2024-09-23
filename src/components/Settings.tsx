@@ -39,7 +39,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings, 
           onChange={(e) => handleFormatChange(e.target.value as AudioFormat)}
         >
           {Object.values(AudioFormat)
-            .filter((x) => AudioFormatUtil.isAAC(x))
+            //.filter((x) => AudioFormatUtil.isAAC(x))
             .map((format, index) => (
               <option key={index} value={format}>
                 {format}
