@@ -4,7 +4,6 @@ import { TrackObjectSimplified, PagingObject, PlaylistTrackObject, PlaylistObjec
 import { TracksCommonFields, MediaType } from './interfaces'
 import { fetchWithRetry } from "../utils/fetch-helpers";
 import { RetryOptions } from "../utils/userSettings";
-
 const PUBLIC_API_URL: string = "https://api.spotify.com/v1";
 
 export class SpotifyAPI {
@@ -70,6 +69,21 @@ export class SpotifyAPI {
 
     static async getWidevineLicense(challenge: ArrayBuffer, accessToken: string, retryOptions: RetryOptions): Promise<Uint8Array> {
         const url = 'https://gue1-spclient.spotify.com/widevine-license/v1/audio/license';
+        const options: RequestInit = {
+            method: 'POST',
+            body: challenge,
+            headers: {
+                'Content-Type': 'application/octet-stream'
+            }
+        };
+
+        const response = await this.fetchWithToken(url, accessToken, retryOptions, options);
+        const data = await response.arrayBuffer();
+        return new Uint8Array(data);
+    }
+
+    static async getPlayPlayLicense(challenge: ArrayBuffer, fileId: string, accessToken: string, retryOptions: RetryOptions): Promise<Uint8Array> {
+        const url = `https://gew4-spclient.spotify.com/playplay/v1/key/${fileId}`;
         const options: RequestInit = {
             method: 'POST',
             body: challenge,

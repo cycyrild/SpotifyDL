@@ -1,11 +1,12 @@
 import { AudioFormat } from "./audioformats";
 import { TrackMetadata } from "./spotify-api/metadata";
-import { FileDownloadData } from "./utils/fetch-helpers";
+//import { FileDownloadData } from "./utils/fetch-helpers";
 
 export interface TrackData {
-  trackFiledata: FileDownloadData<Buffer>;
-  coverFileData: FileDownloadData<Buffer> | undefined;
-  key: string;
+  trackFiledata: Buffer;
+  coverFileData: Buffer | undefined;
+  ffmpegDecryptionKey?: string;
+  aesDecryptionKey?: string;
   metadata: TrackMetadata;
   spotifyId: string;
   audioFormat: AudioFormat

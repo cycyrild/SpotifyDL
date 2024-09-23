@@ -1,4 +1,4 @@
-import { FileDownloadData } from "./fetch-helpers";
+//import { FileDownloadData } from "./fetch-helpers";
 
 export async function limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: T[] = [];
@@ -30,13 +30,13 @@ export async function limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: n
   });
 }
 
-export function toHexString(byteArray: Uint8Array): string {
+/*export function toHexString(byteArray: Uint8Array): string {
   return Array.from(byteArray, (byte: number) => {
     return ('0' + (byte & 0xFF).toString(16)).slice(-2);
   }).join('');
-}
+}*/
 
-export function chromeDownload(file: FileDownloadData<Uint8Array>, title: string) {
+export function chromeDownload(file: Uint8Array, extension: string, name: string) {
 
   function DownloadCallback(downloadId: number, blobUrl: string) {
     if (downloadId) {
@@ -53,19 +53,16 @@ export function chromeDownload(file: FileDownloadData<Uint8Array>, title: string
   }
 
   function sanitizeFilename(filename: string): string {
-    const forbiddenCharacters = /[<>:"\/\\|?*\x00-\x1F]/g;
+    const forbiddenCharacters = /[<>:"\/\\|?*\x00-\x1F.]/g;
     return filename.replace(forbiddenCharacters, '');
   }
 
-
-
-  const blob = new Blob([file.arrayBuffer], { type: file.mimetype });
-
+  const blob = new Blob([file], { type: `audio/${extension}` });
   var blobUrl = URL.createObjectURL(blob);
 
   chrome.downloads.download({
     url: blobUrl,
-    filename: sanitizeFilename(`${title}.${file.extension}`)
+    filename: `${sanitizeFilename(name)}.${extension}`,
   },
     (downloadId: number) => {
       DownloadCallback(downloadId, blobUrl);
