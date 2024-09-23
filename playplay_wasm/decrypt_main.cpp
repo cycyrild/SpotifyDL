@@ -1,3 +1,4 @@
+/*SOURCE: https://git.gay/uhwot/unplayplay/src/branch/main/src/decrypt_main.cc*/
 #include "main.h"
 
 void decrypt_main(const uint8 key_basis[16], uint8 dst[16]) {
@@ -1386,11 +1387,11 @@ void decrypt_main(const uint8 key_basis[16], uint8 dst[16]) {
 		v356 = v353 - v355;
 		v357 = v354 + 666380749 * v356;
 		v358 = v355 + __ROL4__(v357, 24);
-		int signed_v358 = static_cast<int>(v358); // Conversion en type signé
-		int signed_v359 = -signed_v358 ^ static_cast<int>(v356); // Conversion en type signé
-		v359 = static_cast<unsigned int>(signed_v359); // Conversion en type non signé
-		int signed_v360 = static_cast<int>(v357) - __ROL4__(-signed_v358, 20) - __ROL4__(signed_v359, 1); // Conversion en type signé
-		v360 = static_cast<unsigned int>(signed_v360); // Conversion en type non signé
+		int signed_v358 = static_cast<int>(v358); // Conversion en type signï¿½
+		int signed_v359 = -signed_v358 ^ static_cast<int>(v356); // Conversion en type signï¿½
+		v359 = static_cast<unsigned int>(signed_v359); // Conversion en type non signï¿½
+		int signed_v360 = static_cast<int>(v357) - __ROL4__(-signed_v358, 20) - __ROL4__(signed_v359, 1); // Conversion en type signï¿½
+		v360 = static_cast<unsigned int>(signed_v360); // Conversion en type non signï¿½
 		v361 = v360 - v358;
 		v362 = v359 ^ __ROL4__(v360 - v358, 4);
 		v363 = v360 - playIntentKey[(unsigned __int8)v362 + 462];

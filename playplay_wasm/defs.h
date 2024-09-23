@@ -1,3 +1,4 @@
+/*SOURCE: https://git.gay/uhwot/unplayplay/src/branch/main/src/defs.h*/
 #if defined(__GNUC__)
   typedef          long long ll;
   typedef unsigned long long ull;
