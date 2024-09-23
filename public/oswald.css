@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Oswald';
-    src: url('./font/Oswald-Regular.ttf') format('truetype');
+    src: url('./font/static/Oswald-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }

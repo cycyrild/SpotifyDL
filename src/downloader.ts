@@ -1,15 +1,13 @@
 import { SpotifyAPI } from "./spotify-api/spotify-api"
-import { DeviceV2Parser, DeviceV2 } from './widevine/device';
+import { DeviceV2 } from './widevine/device';
 import { Buffer, } from 'buffer';
-
 import * as Metadata from "./spotify-api/metadata";
 import { TrackMetadata } from "./spotify-api/metadata";
-//import { FileDownloadData } from "./utils/fetch-helpers"
 import * as FetchHelpers from "./utils/fetch-helpers"
 import FFMPEGTool from "./utils/ffmpegtool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { TrackData } from "./trackdata";
-import { AudioFormat, AudioFormatUtil } from "./audioformats";
+import { AudioFormatUtil } from "./audioformats";
 import { Settings } from "./utils/userSettings"
 import * as PlayPlayHelper from "./playplay_helper"
 import * as WidevineHelper from "./widevine_helper"
@@ -46,7 +44,7 @@ class Downloader {
       PlayPlayDecrypt.load()
     ]);
     this.ffmpegTool = ffmpegTool;
-    this.device = DeviceV2Parser.parse(deviceBytes);
+    this.device = DeviceV2.parse(deviceBytes);
     this.playplayDecrypt = playplayDecrypt;
   }
 
@@ -91,13 +89,13 @@ class Downloader {
     let aesDecryptionKey: string | undefined;
 
     if (AudioFormatUtil.isAAC(settings.format)) {
-      if(!this.device)
+      if (!this.device)
         throw new Error(`Widevine device not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
       ffmpegDecryptionKey = await WidevineHelper.getKey(fileToDownload.file_id, accessToken, this.device, settings.retryOptions);
     }
     else if (AudioFormatUtil.isVorbis(settings.format)) {
-      if(!this.playplayDecrypt)
+      if (!this.playplayDecrypt)
         throw new Error(`PlayPlay decrypt not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
       aesDecryptionKey = await PlayPlayHelper.getKey(fileToDownload.file_id, accessToken, this.playplayDecrypt, settings.retryOptions);
@@ -138,10 +136,10 @@ class Downloader {
 
           const track = await this.DownloadTrack(id, accessToken, settings);
 
-          if(!track.aesDecryptionKey && !track.ffmpegDecryptionKey)
+          if (!track.aesDecryptionKey && !track.ffmpegDecryptionKey)
             throw new Error(`No decryption key found`);
 
-          if(track.aesDecryptionKey)
+          if (track.aesDecryptionKey)
             track.trackFiledata = await PlayPlayHelper.decipherData(track.trackFiledata, track.aesDecryptionKey);
 
           if (AudioFormatUtil.isVorbis(settings.format))

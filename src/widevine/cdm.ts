@@ -1,6 +1,6 @@
 import { AesCmac } from "aes-cmac";
 import forge from 'node-forge';
-import * as licenseProtocol from './license_protocol';
+import * as licenseProtocol from './widevine';
 import { Key } from './key'
 import { DeviceV2 } from './device'
 import { PsshInterface } from './pssh'
@@ -14,7 +14,7 @@ export class Cdm {
 
     private context: [Buffer, Buffer] | undefined;
 
-    sign(licenseRequest: Buffer, privateKey: forge.pki.rsa.PrivateKey): Buffer {
+    private sign(licenseRequest: Buffer, privateKey: forge.pki.rsa.PrivateKey): Buffer {
         const md = forge.md.sha1.create();
         md.update(licenseRequest.toString('binary'));
 
@@ -29,13 +29,13 @@ export class Cdm {
         return Buffer.from(signature, 'binary');
     }
 
-    async deriveKey(key: Buffer, context: Buffer, counter: number): Promise<Buffer> {
+    private async deriveKey(key: Buffer, context: Buffer, counter: number): Promise<Buffer> {
         const data = Buffer.concat([Buffer.from([counter]), context]);
         const aesCmac = new AesCmac(key);
         return Buffer.from(await aesCmac.calculate(data));
     }
 
-    async deriveKeys(encContext: Buffer, macContext: Buffer, key: Buffer): Promise<Buffer[]> {
+    private async deriveKeys(encContext: Buffer, macContext: Buffer, key: Buffer): Promise<Buffer[]> {
         const encKey = await this.deriveKey(key, encContext, 1);
         const macKeyServerPart1 = await this.deriveKey(key, macContext, 1);
         const macKeyServerPart2 = await this.deriveKey(key, macContext, 2);
@@ -48,7 +48,7 @@ export class Cdm {
         return [encKey, macKeyServer, macKeyClient];
     }
 
-    deriveContext(message: Buffer): [Buffer, Buffer] {
+    private deriveContext(message: Buffer): [Buffer, Buffer] {
         function buildThing(label: string, keySize: Buffer): Buffer {
             const labelBuffer = Buffer.from(label + '\0', 'ascii');
             const ms = Buffer.concat([labelBuffer, message, keySize]);

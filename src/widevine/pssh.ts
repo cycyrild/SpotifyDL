@@ -1,4 +1,4 @@
-import * as licenseProtocol from './license_protocol';
+import * as licenseProtocol from './widevine';
 
 export interface PsshInterface {
   PsshSize: number;

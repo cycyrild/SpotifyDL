@@ -1,12 +1,13 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
 
     return {
         mode: isProduction ? 'production' : 'development',
-        target: ['web', 'es2020'],
+        target: ['web'],
         entry: {
             app: path.resolve(__dirname, "..", "src", "index.tsx"),
             background: path.resolve(__dirname, "..", "src", "background.ts")
@@ -51,8 +52,12 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new CopyPlugin({
-                patterns: [{ from: ".", to: ".", context: "public" }]
+              patterns: [{ from: '.', to: '.', context: 'public' }],
             }),
-        ]
+            new ESLintPlugin({
+              extensions: ['ts', 'js'],
+              fix: true,
+            })
+          ]
     };
 };
