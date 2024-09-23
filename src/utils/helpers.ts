@@ -53,12 +53,12 @@ export function chromeDownload(file: Uint8Array, extension: string, name: string
   }
 
   function sanitizeFilename(filename: string): string {
-    const forbiddenCharacters = /[<>:"\/\\|?*\x00-\x1F.]/g;
+    const forbiddenCharacters = /[<>:"/\\|?*.]/g;
     return filename.replace(forbiddenCharacters, '');
   }
 
   const blob = new Blob([file], { type: `audio/${extension}` });
-  var blobUrl = URL.createObjectURL(blob);
+  const blobUrl = URL.createObjectURL(blob);
 
   chrome.downloads.download({
     url: blobUrl,

@@ -26,9 +26,9 @@ class FFMPEGTool {
             workerURL: FFMPEG_WORKER
         });
 
-        ffmpeg.on('log', ({ message }) => {
+        /*ffmpeg.on('log', ({ message }) => {
             console.log(message);
-        });
+        });*/
 
         if (!isFirst)
             throw new Error("An instance of ffmpeg has already been initialized");
@@ -38,14 +38,14 @@ class FFMPEGTool {
 
     private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string | undefined) {
 
-        function convertToISO8601(date) {
+        function convertToISO8601(date: any ) {
             const year = date.year;
             const month = date.month ? String(date.month).padStart(2, '0') : '01';
             const day = date.day ? String(date.day).padStart(2, '0') : '01';
             return `${year}-${month}-${day}`;
         }
 
-        let ffmpegArgs: string[] = [];
+        const ffmpegArgs: string[] = [];
 
         if (decryptionKey)
             ffmpegArgs.push('-decryption_key', decryptionKey);
@@ -90,7 +90,7 @@ class FFMPEGTool {
             if (error != 0) {
                 throw new Error(`FFmpeg execution failed with code: ${error}`);
             }
-        } catch (e) {
+        } catch (e:any) {
             console.error("FFmpeg execution encountered an error:", e);
             throw new Error(`FFmpeg runtime error: ${e.messag}`);
         }
@@ -98,11 +98,8 @@ class FFMPEGTool {
 
     public async ProcessFiles(track: TrackData, audioContainer: string) {
         let coverFilename: string | undefined;
-        let audioInputFilename: string;
-        let audioOutputFilename: string;
-
-        audioOutputFilename = `A${track.spotifyId}.${audioContainer}`;
-        audioInputFilename = `B${track.spotifyId}`;
+        const audioOutputFilename = `A${track.spotifyId}.${audioContainer}`;
+        const audioInputFilename = `B${track.spotifyId}`;
 
 
         return await this.mutex.runExclusive(async () => {

@@ -2,8 +2,10 @@
     "presets": [
         ["@babel/preset-env", {
             "targets": {
-                "chrome": "100"
-            }
+                "chrome": "100",
+                "esmodules": true
+            },
+            "modules": false
           }],
         "@babel/preset-typescript",
         "@babel/preset-react"

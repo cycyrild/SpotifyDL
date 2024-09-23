@@ -1,34 +1,41 @@
-import * as licenseProtocol from './license_protocol';
+import * as licenseProtocol from './widevine';
 import { Buffer } from 'buffer';
 import forge from 'node-forge';
+
+const Magic: string = "WVD";
 
 export enum DeviceTypes {
 	CHROME = 1,
 	ANDROID = 2
 }
 
-export interface DeviceV2 {
-	Version: number;
-	Type: DeviceTypes;
-	SecurityLevel: number;
-	Flags: number;
-	PrivateKey: Buffer;
-	ClientId: licenseProtocol.ClientIdentification;
-	RsaPrivateCrt: forge.pki.rsa.PrivateKey;
-}
+export class DeviceV2 {
 
-const Magic: string = "WVD";
+	public Version: number;
+	public Type: DeviceTypes;
+	public SecurityLevel: number;
+	public Flags: number;
+	public PrivateKey: Buffer;
+	public ClientId: licenseProtocol.ClientIdentification;
+	public RsaPrivateCrt: forge.pki.rsa.PrivateKey;
 
-export class DeviceV2Parser {
-
-
-	private static readRsaPrivateCrt(privateKey: ArrayBuffer): forge.pki.rsa.PrivateKey {
-		const asn1 = forge.asn1.fromDer(forge.util.createBuffer(new Uint8Array(privateKey)));
-		const privateKeyInfo = forge.pki.privateKeyFromAsn1(asn1);
-
-		return privateKeyInfo;
+	private constructor(
+		Version: number,
+		Type: DeviceTypes,
+		SecurityLevel: number,
+		Flags: number,
+		PrivateKey: Buffer,
+		ClientId: licenseProtocol.ClientIdentification,
+		RsaPrivateCrt: forge.pki.rsa.PrivateKey
+	) {
+		this.Version = Version;
+		this.Type = Type;
+		this.SecurityLevel = SecurityLevel;
+		this.Flags = Flags;
+		this.PrivateKey = PrivateKey;
+		this.ClientId = ClientId;
+		this.RsaPrivateCrt = RsaPrivateCrt;
 	}
-
 
 	static parse(data: Buffer): DeviceV2 {
 		const expectedSignature = Buffer.from(Magic, 'ascii');
@@ -45,7 +52,7 @@ export class DeviceV2Parser {
 			throw new Error("CDM version not supported");
 		}
 
-		const type = reader.getUint8(offset++);
+		const type = reader.getUint8(offset++) as DeviceTypes;
 		const securityLevel = reader.getUint8(offset++);
 		const flags = reader.getUint8(offset++);
 
@@ -60,17 +67,23 @@ export class DeviceV2Parser {
 		offset += clientIdLength;
 
 		const clientIdDecoded = licenseProtocol.ClientIdentification.decode(clientId);
-		const rsaPrivateCrt = DeviceV2Parser.readRsaPrivateCrt(privateKey);
+		const rsaPrivateCrt = DeviceV2.readRsaPrivateCrt(privateKey);
 
-		return {
-			Version: version,
-			Type: type,
-			SecurityLevel: securityLevel,
-			Flags: flags,
-			RsaPrivateCrt: rsaPrivateCrt,
-			ClientId: clientIdDecoded,
-			PrivateKey: privateKey
-		};
+		return new DeviceV2(
+			version,
+			type,
+			securityLevel,
+			flags,
+			privateKey,
+			clientIdDecoded,
+			rsaPrivateCrt
+		);
 	}
 
+	private static readRsaPrivateCrt(privateKey: ArrayBuffer): forge.pki.rsa.PrivateKey {
+		const asn1 = forge.asn1.fromDer(forge.util.createBuffer(new Uint8Array(privateKey)));
+		const privateKeyInfo = forge.pki.privateKeyFromAsn1(asn1);
+
+		return privateKeyInfo;
+	}
 }

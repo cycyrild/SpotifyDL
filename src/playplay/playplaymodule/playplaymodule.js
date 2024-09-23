@@ -1,3 +1,4 @@
+/* eslint-disable */
 
 var PlayPlayModule = (() => {
   var _scriptDir = import.meta.url;

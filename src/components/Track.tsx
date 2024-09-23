@@ -51,7 +51,7 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
             "--trackHeadBg": `var(${progress ? (!progress.complete() ? "--bgInProgress" : (!progress.error ? "--bgComplete" : "--bgError")) : "--bgDefault"})`
         } as React.CSSProperties;
 
-    const handleInfoClick = (event) => {
+    const handleInfoClick = (event: any) => {
         event.stopPropagation();
         setMoreInfoOpen(!moreInfoOpen);
     };

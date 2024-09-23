@@ -34,7 +34,7 @@ const useSpotifyData = () => {
 
     const getIdFromUrl = (url: string): [MediaType, string] | undefined => {
         const mediaTypes = Object.values(MediaType).join('|');
-        const spotifyUrlPattern = new RegExp(`https:\/\/.*open\.spotify\.com.*\/(${mediaTypes})\/([a-zA-Z0-9]+)`);
+        const spotifyUrlPattern = new RegExp(`https://.*open.spotify.com.*/(${mediaTypes})/([a-zA-Z0-9]+)`);
         const match = url.match(spotifyUrlPattern);
     
         if (match) {

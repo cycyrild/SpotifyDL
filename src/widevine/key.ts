@@ -1,5 +1,5 @@
 import * as forge from 'node-forge';
-import * as licenseProtocol from './license_protocol';
+import * as licenseProtocol from './widevine';
 //import { v4 as uuidv4, stringify as uuidStringify } from 'uuid';
 
 

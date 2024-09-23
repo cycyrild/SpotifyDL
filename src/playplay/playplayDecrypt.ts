@@ -10,7 +10,10 @@ export class PlayPlayDecrypt {
     }
 
     public static async load() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const { default: PlayPlayModule } = await import('./playplaymodule/playplaymodule.js');
+        
         const playPlayModule = await PlayPlayModule();
         return new PlayPlayDecrypt(playPlayModule);
     }

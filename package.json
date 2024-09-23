@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "proto-widevine": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=esModuleInterop=true,forceLong=long --ts_proto_out=./src/widevine --proto_path=./proto ./proto/license_protocol.proto",
-    "proto-playplay": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=esModuleInterop=true,forceLong=long --ts_proto_out=./src/playplay --proto_path=./proto ./proto/playplay.proto",
+    "proto": "./proto/build.sh",
+    "playplay": "./playplay/build.sh",
     "build": "webpack --config webpack/webpack.config.js --mode production",
-    "start": "webpack --config webpack/webpack.config.js --mode development",
-    "build-playplay": "./playplay_wasm/build.sh"
+    "start": "webpack --config webpack/webpack.config.js --mode development"
   },
   "keywords": [],
   "author": "",
@@ -37,9 +37,13 @@
     "@types/node-forge": "^1.3.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
     "babel-loader": "^9.1.3",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
+    "eslint": "^9.11.1",
+    "eslint-webpack-plugin": "^4.2.0",
     "style-loader": "^4.0.0",
     "ts-proto": "^1.181.0",
     "ts-protoc-gen": "^0.15.0",

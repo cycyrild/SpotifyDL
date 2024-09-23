@@ -2,7 +2,7 @@
 // versions:
 //   protoc-gen-ts_proto  v1.181.2
 //   protoc               v3.12.4
-// source: license_protocol.proto
+// source: widevine.proto
 
 /* eslint-disable */
 import Long from "long";
