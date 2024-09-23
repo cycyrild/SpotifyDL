@@ -1,4 +1,5 @@
 # SpotifyDL Chrome Extension
+<img src="img1.png" style="width:700px;"/>
 
 ## Description
 Allows users to download track, playlist or album Spotify from the browser.
@@ -11,7 +12,7 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 **Widevine decryption requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
 
-<img src="img1.png" style="width:700px;"/>
+
 
 ## Installation
 
