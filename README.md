@@ -9,7 +9,7 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 - **Integrated decryption** of the protected file and addition of metadata with **FFmpeg WASM**.
 
-Widevine decryption **Requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
+**Widevine decryption requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
 
 <img src="img1.png" style="width:700px;"/>
 

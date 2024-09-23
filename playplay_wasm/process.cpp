@@ -1,3 +1,4 @@
+/*SOURCE: https://git.gay/uhwot/unplayplay/src/branch/main/src/process.cc*/
 #include "main.h"
 
 uint32 process(char a1, uint32 a2, uint32 a3, uint32 a4, uint32 a5)
@@ -4318,7 +4319,7 @@ uint32 process(char a1, uint32 a2, uint32 a3, uint32 a4, uint32 a5)
             v855 = v854 + v853;
             v856 = v852 ^ (v854 - 86077136);
             v857 = v855 ^ (v856 - v853);
-            int signed_v853 = static_cast<int>(v853); // Conversion en type signé
+            int signed_v853 = static_cast<int>(v853); // Conversion en type signï¿½
             v858 = v856 - ((__ROL4__(-signed_v853, 7) + 16289) ^ (v857 + 13627));
             v859 = __ROL4__(v858, 11) + __ROL4__(v857, 9) - v853;
             v826 = v857 - v858;
