@@ -36,7 +36,7 @@ export async function getKey(fileId: string, accessToken: string, playPlayDecryp
 }
 
 
-export async function decipherData(encryptedData: Buffer, keyStrg: string) {
+export function decipherData(encryptedData: Buffer, keyStrg: string) {
   const cipher = forge.cipher.createDecipher('AES-CTR', forge.util.hexToBytes(keyStrg));
 
   const fullCounter = forge.util.createBuffer(forge.util.hexToBytes(NONCE + INITIAL_VALUE));

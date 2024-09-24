@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "proto-widevine": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=esModuleInterop=true,forceLong=long --ts_proto_out=./src/widevine --proto_path=./proto ./proto/license_protocol.proto",
     "proto": "./proto/build.sh",
     "playplay": "./playplay/build.sh",
     "build": "webpack --config webpack/webpack.config.js --mode production",
