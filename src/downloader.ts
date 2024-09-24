@@ -140,7 +140,7 @@ class Downloader {
             throw new Error(`No decryption key found`);
 
           if (track.aesDecryptionKey)
-            track.trackFiledata = await PlayPlayHelper.decipherData(track.trackFiledata, track.aesDecryptionKey);
+            track.trackFiledata = PlayPlayHelper.decipherData(track.trackFiledata, track.aesDecryptionKey);
 
           if (AudioFormatUtil.isVorbis(settings.format))
             Ogg.rebuildOgg(track.trackFiledata);
