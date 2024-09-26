@@ -19,8 +19,7 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 ### Project To-Do List
 
-- [ ] **Offload AES-CTR decryption to Web Worker**  
-  Move AES-CTR decryption (currently done using node-forge) to a Web Worker to **prevent UI freezing**, or alternatively, implement decryption using WebCrypto.
+- [~] *Done for PlayPlay* - **Migrate decryption from node-forge to WebCrypto for Widevine** to improve performance and prevent UI freezing.
 
 - [ ] **Add user settings for audio container and codec selection**  
   Allow users to choose the audio container and/or codec when using FFmpeg by adding corresponding settings in the user interface.
