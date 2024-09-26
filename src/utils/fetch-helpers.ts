@@ -1,5 +1,7 @@
 export type ProgressCallback = (loaded: number, total: number, id: string) => void;
+
 import { Buffer } from 'buffer';
+
 import { RetryOptions } from './userSettings';
 
 export async function fetchWithRetry(url: string, retryOptions: RetryOptions, init?: RequestInit): Promise<Response> {
@@ -22,7 +24,7 @@ export async function fetchWithRetry(url: string, retryOptions: RetryOptions, in
             }
 
             const retryDelay = retryOptions.delay * Math.pow(2, attempt) + Math.random() * 100;
-            console.log(`Error encountered, retrying in ${retryDelay.toFixed(0)}ms`);
+            console.error(`Error encountered, retrying in ${retryDelay.toFixed(0)}ms`, error);
             await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
     }

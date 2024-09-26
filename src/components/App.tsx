@@ -19,7 +19,19 @@ import { removeAccessTokenFromCache } from '../spotifyauth';
 import SettingsComponent from './Settings';
 
 const App: React.FC = () => {
-  const { tracksCommonFields, spotifyAccessToken, loading: loadingShow, downloaderRef, overallProgress, remainingItems, progressDetails, error: errorShow } = useSpotifyData();
+  const
+  {
+    tracksCommonFields: tracksCommonFields,
+    spotifyAccessToken: spotifyAccessToken,
+    loading: loadingShow,
+    downloaderRef: downloaderRef,
+    overallProgress: overallProgress,
+    remainingItems: remainingItems,
+    progressDetails: progressDetails,
+    error: errorShow,
+    currentSettings : currentSettings,
+  } = useSpotifyData();
+
   const [updated, setUpdated] = React.useState(false);
   const [settingsShow, setSettingsOpen] = React.useState(false);
 
@@ -27,8 +39,6 @@ const App: React.FC = () => {
     "--progress": `${overallProgress}%`,
     "--bg-color": !loadingShow && !errorShow ? (remainingItems == 0 ? "var(--bg-ready)" : "var(--bg-progress)") : "var(--bg-disabled)"
   } as React.CSSProperties;
-
-  const [currentSettings, setSettings] = React.useState(userSettings.defaultSettings);
 
   const chromeDownload = (file: DownloadResult) => {
     Helpers.chromeDownload(file.data, file.extension, file.metadata.original_title);
@@ -40,8 +50,8 @@ const App: React.FC = () => {
       return;
     }
 
-    if (spotifyAccessToken.current && downloaderRef.current) {
-      await downloaderRef.current.DownloadTrackAndDecrypt(new Set([track.id]), spotifyAccessToken.current, currentSettings, chromeDownload);
+    if (downloaderRef.current) {
+      await downloaderRef.current.DownloadTracksAndDecrypt(new Set([track.id]), chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
@@ -59,9 +69,9 @@ const App: React.FC = () => {
       return;
     }
 
-    if (spotifyAccessToken.current && downloaderRef.current && tracksCommonFields) {
+    if (downloaderRef.current && tracksCommonFields) {
       const uniqueTrackIds = new Set(tracksCommonFields.tracks.map(x => x.id));
-      await downloaderRef.current.DownloadTrackAndDecrypt(uniqueTrackIds, spotifyAccessToken.current, currentSettings, chromeDownload);
+      await downloaderRef.current.DownloadTracksAndDecrypt(uniqueTrackIds, chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }
@@ -71,11 +81,7 @@ const App: React.FC = () => {
     (async () => {
       const updated = await isUpdated();
       setUpdated(updated)
-
-      const settings = await userSettings.loadSettings();
-      setSettings(settings);
     })();
-
   }, []);
 
   const getIcon = (type: MediaType) => {
@@ -103,7 +109,7 @@ const App: React.FC = () => {
   return (
     <>
       <div className="top top-elt ui-bar">
-        <h1>SPOTIFY DL V1</h1>
+        <h1>SPOTIFY DL</h1>
       </div>
 
       {tracksCommonFields &&
@@ -170,7 +176,7 @@ const App: React.FC = () => {
           <CriticalErrorComponent error={errorShow} />}
 
         {settingsShow &&
-          <SettingsComponent currentSettings={currentSettings} setSettings={setSettings}></SettingsComponent>}
+          <SettingsComponent currentSettings={currentSettings}></SettingsComponent>}
 
         
       </div>

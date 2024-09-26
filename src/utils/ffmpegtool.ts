@@ -8,7 +8,7 @@ const FFMPEG_CORE = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.js');
 const FFMPEG_CORE_WASM = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.wasm');
 const FFMPEG_WORKER = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.worker.js');
 
-class FFMPEGTool {
+export class FFMPEGTool {
 
     private ffmpeg: FFmpeg;
     private mutex: Mutex;
@@ -26,8 +26,9 @@ class FFMPEGTool {
             workerURL: FFMPEG_WORKER
         });
 
-        /*ffmpeg.on('log', ({ message }) => {
-            console.log(message);
+        /*ffmpeg.on('log', ({ type, message }) => {
+            if(type === 'stderr')
+                console.error(message);
         });*/
 
         if (!isFirst)
@@ -133,5 +134,3 @@ class FFMPEGTool {
     }
 
 }
-
-export default FFMPEGTool;
