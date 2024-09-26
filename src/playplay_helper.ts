@@ -4,7 +4,7 @@ import { SpotifyAPI } from "./spotify-api/spotify-api";
 import { RetryOptions } from "./utils/userSettings";
 import { Buffer } from "buffer";
 import { PlayPlayDecrypt } from "./playplay/playplayDecrypt";
-import forge from 'node-forge';
+//import forge from 'node-forge';
 
 const REQUEST_TOKEN = Buffer.from("01e132cae527bd21620e822f58514932", "hex");
 const NONCE = '72e067fbddcbcf77';
@@ -36,22 +36,27 @@ export async function getKey(fileId: string, accessToken: string, playPlayDecryp
 }
 
 
-export function decipherData(encryptedData: Buffer, keyStrg: string) {
-  const cipher = forge.cipher.createDecipher('AES-CTR', forge.util.hexToBytes(keyStrg));
+export async function decipherData(encryptedData: Buffer, keyStrg: string): Promise<Buffer> {
+  const keyBytes = Buffer.from(keyStrg, 'hex');
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-CTR' },
+    false,
+    ['decrypt']
+  );
 
-  const fullCounter = forge.util.createBuffer(forge.util.hexToBytes(NONCE + INITIAL_VALUE));
+  const counter = Buffer.from(NONCE + INITIAL_VALUE, 'hex');
 
-  cipher.start({
-    iv: fullCounter.getBytes()
-  });
+  const decryptedArrayBuffer = await crypto.subtle.decrypt(
+    {
+      name: 'AES-CTR',
+      counter: counter,
+      length: 64
+    },
+    key,
+    encryptedData
+  );
 
-  cipher.update(forge.util.createBuffer(encryptedData.toString('binary')));
-
-  if (!cipher.finish()) {
-    throw new Error('Decryption failed.');
-  }
-
-  const decryptedData = Buffer.from(cipher.output.getBytes(), 'binary');
-
-  return decryptedData;
+  return Buffer.from(decryptedArrayBuffer);
 }
