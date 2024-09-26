@@ -10,7 +10,23 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 - **Integrated decryption** of the protected file and addition of metadata with **FFmpeg WASM**.
 
-**Widevine decryption requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
+- Supports **parallel downloads**.
+
+
+> **Widevine decryption requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
+
+> *For any comments, bug reports or other ... please contact me on **Discord: cyril13600***
+
+### Project To-Do List
+
+- [ ] **Offload AES-CTR decryption to Web Worker**  
+  Move AES-CTR decryption (currently done using node-forge) to a Web Worker to **prevent UI freezing**, or alternatively, implement decryption using WebCrypto.
+
+- [ ] **Add user settings for audio container and codec selection**  
+  Allow users to choose the audio container and/or codec when using FFmpeg by adding corresponding settings in the user interface.
+
+- [ ] **Improve error logging and add user-friendly error popups**  
+  Enhance error logging mechanisms and implement UI popups that inform users of errors in a clear and user-friendly way.
 
 
 
