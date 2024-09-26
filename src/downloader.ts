@@ -144,7 +144,7 @@ export class Downloader {
       const track = await this.downloadTrack(id);
 
       if (track.decryptionKey.type === "aes")
-        track.trackFiledata = PlayPlayHelper.decipherData(track.trackFiledata, track.decryptionKey.key);
+        track.trackFiledata = await PlayPlayHelper.decipherData(track.trackFiledata, track.decryptionKey.key);
 
       if (AudioFormatUtil.isVorbis(this.settings.current.format))
         Ogg.rebuildOgg(track.trackFiledata);
@@ -172,13 +172,11 @@ export class Downloader {
 
   public async DownloadTracksAndDecrypt(trackIds: Set<string>, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
-    console.log(trackIds);
     this.trackDownloadManager.initializeFiles(trackIds);
 
     const downloadTasks = Array.from(trackIds, id => async () => this.postProcessTrack(id, saveCallback));
 
     this.downloadQueue.addTasks(downloadTasks).then((e) => {
-      console.log(e);
 
       e.forEach((id) => {
 
