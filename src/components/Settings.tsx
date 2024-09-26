@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { AudioFormat, AudioFormatUtil } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
-import { Settings } from '../utils/userSettings';
+import { Settings, isValidSettings } from '../utils/userSettings';
 import * as style from './Settings.module.css';
 
 interface SettingsComponentProps {
@@ -12,27 +12,21 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
   const [, forceUpdate] = React.useState(0);
 
-  const handleFormatChange = async (format: AudioFormat) => {
-    const newSettings = currentSettings.current;
-    newSettings.format = format;
+  const handleSettingChange = async <T extends keyof Settings>(key: T, value: Settings[T]) => {
+    const newSettings = { ...currentSettings.current };
+    newSettings[key] = value;
+
+    if (!isValidSettings(newSettings)) {
+      console.error("Invalid settings");
+      return;
+    }
 
     currentSettings.current = newSettings;
     await userSettings.saveSettings(newSettings);
 
     forceUpdate(prev => prev + 1);
-  };
-
-  const handleMaxDownloadConcurrencyChange = async (maxDownloadConcurency: number) => {
-    if (maxDownloadConcurency >= 1 && maxDownloadConcurency <= 10) {
-      const newSettings = currentSettings.current;
-      newSettings.maxDownloadConcurency = maxDownloadConcurency;
-
-      currentSettings.current = newSettings;
-      await userSettings.saveSettings(newSettings);
-
-      forceUpdate(prev => prev + 1);
-    }
   }
+
 
   return (
     <div className={style.settings} id="form">
@@ -47,7 +41,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
           id="format-select"
           className={style.value}
           value={currentSettings.current.format}
-          onChange={(e) => handleFormatChange(e.target.value as AudioFormat)}
+          onChange={(e) => handleSettingChange('format', e.target.value as AudioFormat)}
         >
           {Object.values(AudioFormat)
             .map((format, index) => (
@@ -66,7 +60,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
           className={style.value}
           type="number"
           value={currentSettings.current.maxDownloadConcurency}
-          onChange={(e) => handleMaxDownloadConcurrencyChange(parseInt(e.target.value))}
+          onChange={(e) => handleSettingChange('maxDownloadConcurency', parseInt(e.target.value))}
         />
       </div>
     </div>

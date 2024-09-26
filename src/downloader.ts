@@ -4,7 +4,7 @@ import { Buffer, } from 'buffer';
 import { TrackMetadata } from "./spotify-api/metadata";
 import { FFMPEGTool } from "./utils/ffmpegtool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
-import { TrackData } from "./trackdata";
+import { DecryptionKey, TrackData } from "./trackdata";
 import { AudioFormatUtil } from "./audioformats";
 import { Settings } from "./utils/userSettings"
 import { DownloadQueue } from "./utils/download-queue"
@@ -29,19 +29,19 @@ export class Downloader {
   private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
   private playplayDecrypt?: PlayPlayDecrypt;
-  private downloadQueue: DownloadQueue<void>;
+  private downloadQueue: DownloadQueue<string|undefined>;
   private settings: React.MutableRefObject<Settings>;
-  private accessToken : React.MutableRefObject<string>;
-  
+  private accessToken: React.MutableRefObject<string>;
+
   private constructor(uiUpdateCallback: UIUpdateCallback, settings: React.MutableRefObject<Settings>, accessToken: React.MutableRefObject<string>) {
 
     this.trackDownloadManager = new TrackDownloadManager(uiUpdateCallback);
-    this.downloadQueue = new DownloadQueue<void>(settings);
+    this.downloadQueue = new DownloadQueue<string|undefined>(settings);
     this.settings = settings;
     this.accessToken = accessToken;
   }
 
-  public static async Create(uiUpdateCallback: UIUpdateCallback, settings: React.MutableRefObject<Settings>, accessToken:  React.MutableRefObject<string>): Promise<Downloader> {
+  public static async Create(uiUpdateCallback: UIUpdateCallback, settings: React.MutableRefObject<Settings>, accessToken: React.MutableRefObject<string>): Promise<Downloader> {
     const downloader = new Downloader(uiUpdateCallback, settings, accessToken);
     await downloader.loadDependencies();
     return downloader;
@@ -49,9 +49,9 @@ export class Downloader {
 
   private async loadDependencies() {
     const [ffmpegTool, deviceBytes, playplayDecrypt] = await Promise.all([
-      FFMPEGTool.create(),
+      FFMPEGTool.Create(),
       FetchHelpers.fetchAsBuffer(DEVICE_URL),
-      PlayPlayDecrypt.load()
+      PlayPlayDecrypt.Create()
     ]);
     this.ffmpegTool = ffmpegTool;
     this.device = DeviceV2.parse(deviceBytes);
@@ -89,20 +89,29 @@ export class Downloader {
       downloadCoverTask = FetchHelpers.fetchAsBuffer(coverUrl);
     }
 
-    let ffmpegDecryptionKey: string | undefined;
-    let aesDecryptionKey: string | undefined;
+    let decryptionKey: DecryptionKey | undefined;
 
     if (AudioFormatUtil.isAAC(this.settings.current.format)) {
       if (!this.device)
         throw new Error(`Widevine device not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-      ffmpegDecryptionKey = await WidevineHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.device, this.settings.current.retryOptions);
+      
+      const ffmpegDecryptionKey = await WidevineHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.device, this.settings.current.retryOptions);
+      decryptionKey = {
+        type: "ffmpeg",
+        key: ffmpegDecryptionKey
+      };
     }
     else if (AudioFormatUtil.isVorbis(this.settings.current.format)) {
       if (!this.playplayDecrypt)
         throw new Error(`PlayPlay decrypt not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-      aesDecryptionKey = await PlayPlayHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.playplayDecrypt, this.settings.current.retryOptions);
+      
+      const aesDecryptionKey = await PlayPlayHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.playplayDecrypt, this.settings.current.retryOptions);
+      decryptionKey = {
+        type: "aes",
+        key: aesDecryptionKey
+      };
     }
     else
       throw new Error(`Unsupported audio format ${this.settings.current.format}`);
@@ -111,11 +120,14 @@ export class Downloader {
     const trackFiledata = await downloadTrackTask;
     const coverFileData = await downloadCoverTask;
 
+    if (!decryptionKey) {
+      throw new Error(`No decryption key found`);
+    }
+
     const obj: TrackData = {
       trackFiledata: trackFiledata,
       coverFileData: coverFileData,
-      ffmpegDecryptionKey: ffmpegDecryptionKey,
-      aesDecryptionKey: aesDecryptionKey,
+      decryptionKey: decryptionKey,
       metadata: metadata,
       spotifyId: trackId,
       audioFormat: this.settings.current.format
@@ -131,17 +143,11 @@ export class Downloader {
 
       const track = await this.downloadTrack(id);
 
-      if (!track.aesDecryptionKey && !track.ffmpegDecryptionKey) {
-        throw new Error(`No decryption key found`);
-      }
+      if (track.decryptionKey.type === "aes")
+        track.trackFiledata = PlayPlayHelper.decipherData(track.trackFiledata, track.decryptionKey.key);
 
-      if (track.aesDecryptionKey) {
-        track.trackFiledata = PlayPlayHelper.decipherData(track.trackFiledata, track.aesDecryptionKey);
-      }
-
-      if (AudioFormatUtil.isVorbis(this.settings.current.format)) {
+      if (AudioFormatUtil.isVorbis(this.settings.current.format))
         Ogg.rebuildOgg(track.trackFiledata);
-      }
 
       const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, this.settings.current.outputAudioContainer);
       this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
@@ -155,21 +161,31 @@ export class Downloader {
       saveCallback(elt);
 
       this.trackDownloadManager.saveProgressCallback(track.spotifyId);
+
+      return track.spotifyId;
     } catch (e) {
       console.error(`Error downloading track ${id}`, e);
       this.trackDownloadManager.errorProgressCallback(id);
     }
   }
 
+
   public async DownloadTracksAndDecrypt(trackIds: Set<string>, saveCallback: (result: DownloadResult) => void): Promise<void> {
 
-    trackIds.forEach(id =>  this.trackDownloadManager.initializeFile(id));
+    console.log(trackIds);
+    this.trackDownloadManager.initializeFiles(trackIds);
 
-    const downloadTasks = Array.from(trackIds,id => async () => this.postProcessTrack(id, saveCallback));
+    const downloadTasks = Array.from(trackIds, id => async () => this.postProcessTrack(id, saveCallback));
 
-    await this.downloadQueue.enqueue(downloadTasks);
+    this.downloadQueue.addTasks(downloadTasks).then((e) => {
+      console.log(e);
 
-    trackIds.forEach(id => this.trackDownloadManager.finishedCallback(id));
+      e.forEach((id) => {
+
+        if(id)
+          this.trackDownloadManager.finishedCallback(id);
+      });
+    });
 
   }
 }

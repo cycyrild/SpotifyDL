@@ -4,10 +4,21 @@ import { TrackMetadata } from "./spotify-api/metadata";
 
 export interface TrackData {
   trackFiledata: Buffer;
-  coverFileData: Buffer | undefined;
-  ffmpegDecryptionKey?: string;
-  aesDecryptionKey?: string;
+  coverFileData?: Buffer;
+  decryptionKey: DecryptionKey;
   metadata: TrackMetadata;
   spotifyId: string;
-  audioFormat: AudioFormat
+  audioFormat: AudioFormat;
+}
+
+export type DecryptionKey = FFMpegDecryptionKey | AESDecryptionKey;
+
+export interface FFMpegDecryptionKey {
+  type: "ffmpeg";
+  key: string;
+}
+
+export interface AESDecryptionKey {
+  type: "aes";
+  key: string;
 }

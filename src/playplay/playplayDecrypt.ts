@@ -9,7 +9,7 @@ export class PlayPlayDecrypt {
         this.mutex = new Mutex();
     }
 
-    public static async load() {
+    public static async Create() {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const { default: PlayPlayModule } = await import('./playplaymodule/playplaymodule.js');

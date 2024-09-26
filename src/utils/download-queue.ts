@@ -1,49 +1,44 @@
 import { Settings } from "./userSettings";
 
 export class DownloadQueue<T> {
-    private queue: Array<() => Promise<T>> = [];
-    private activeCount: number = 0;
-    private settings : React.MutableRefObject<Settings>
-
-    public constructor(settings: React.MutableRefObject<Settings>) {
-        this.settings = settings;
+    private settings: React.MutableRefObject<Settings>;
+    private runningTasks: number = 0;
+    private taskQueue: Array<() => void> = []; // Modifier le type pour () => void
+  
+    constructor(settings: React.MutableRefObject<Settings>) {
+      this.settings = settings;
     }
-
-    public enqueue(tasks: Array<() => Promise<T>>): Promise<void> {
-        tasks.forEach(task => this.queue.push(task));
-
-        return new Promise((resolve, reject) => {
-            const checkIfAllDone = () => {
-                if (this.activeCount === 0 && this.queue.length === 0) {
-                    resolve();
-                }
-            };
-
-            const processQueue = async () => {
-                while (this.activeCount < this.settings.current.maxDownloadConcurency && this.queue.length > 0) {
-                    const task = this.queue.shift();
-                    if (task) {
-                        this.activeCount++;
-                        try {
-                            await task();
-                        } catch (error) {
-                            this.activeCount--;
-                            reject(error);  // Reject the main promise if any task fails
-                        } finally {
-                            this.activeCount--;
-                            processQueue().catch(error => {
-                                console.error("Error processing queue in finally:", error);
-                                reject(error);  // Also reject if there's an error in processing
-                            });
-                            checkIfAllDone();
-                        }
-                    }
-                }
-            };
-
-            processQueue().catch(error => reject(error));
-
-            checkIfAllDone();
-        });
+  
+    async addTasks(tasks: Array<() => Promise<T>>): Promise<T[]> {
+      const taskPromises = tasks.map((task) => this.enqueueTask(task));
+      return Promise.all(taskPromises);
     }
+  
+    private enqueueTask(task: () => Promise<T>): Promise<T> {
+      return new Promise((resolve, reject) => {
+        const runTask = async () => {
+          if (this.runningTasks >= this.settings.current.maxDownloadConcurency) {
+            this.taskQueue.push(runTask);
+            return;
+          }
+  
+          this.runningTasks++;
+          try {
+            const result = await task();
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          } finally {
+            this.runningTasks--;
+            if (this.taskQueue.length > 0) {
+              const nextTask = this.taskQueue.shift();
+              if (nextTask) nextTask();
+            }
+          }
+        };
+  
+        runTask();
+      });
+    }
+      
 }

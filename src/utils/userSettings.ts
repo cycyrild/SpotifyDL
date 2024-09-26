@@ -15,7 +15,7 @@ export interface RetryOptions {
     delay: number;
 }
 
-function isValidSettings(settings: any): settings is Settings {
+export function isValidSettings(settings: any): settings is Settings {
     return (
         settings &&
         typeof settings === 'object' &&

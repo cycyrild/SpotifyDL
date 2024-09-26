@@ -52,11 +52,11 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new CopyPlugin({
-              patterns: [{ from: '.', to: '.', context: 'public' }],
+              patterns: [{ from: '.', to: '.', context: 'public' }]
             }),
             new ESLintPlugin({
               extensions: ['ts', 'js'],
-              fix: true,
+              fix: true
             })
           ]
     };
