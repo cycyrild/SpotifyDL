@@ -30,17 +30,18 @@ export class FileProgressState {
     }
 }
 
-
 export class TrackDownloadManager {
     private progressStates: { [id: string]: FileProgressState } = {};
 
     constructor(private uiUpdateCallback: UIUpdateCallback) { }
 
-    public initializeFile(id: string) {
-        if (this.progressStates[id] && !this.progressStates[id].complete()) {
-            throw new Error("File initialized and not completed");
-        }
-        this.progressStates[id] = new FileProgressState();
+    public initializeFiles(ids: Set<string>) {
+        ids.forEach(id =>{
+            if (this.progressStates[id] && !this.progressStates[id].complete()) {
+                throw new Error("File initialized and not completed");
+            }
+            this.progressStates[id] = new FileProgressState();
+        });
         this.reportGlobalProgress();
     }
 
@@ -82,12 +83,13 @@ export class TrackDownloadManager {
 
     public finishedCallback = (id: string) => {
         if (!this.progressStates[id]) {
-            throw new Error("File needs to be initialized first");
+            throw new Error(`File with id ${id} needs to be initialized first`);
         }
-
         this.progressStates[id].finished = true;
+    
         this.reportGlobalProgress();
     }
+    
 
     private reportGlobalProgress() {
         const activeStates = Object.values(this.progressStates).filter(state => !state.finished && !state.error);

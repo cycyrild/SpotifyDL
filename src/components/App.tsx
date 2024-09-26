@@ -51,7 +51,8 @@ const App: React.FC = () => {
     }
 
     if (downloaderRef.current) {
-      await downloaderRef.current.DownloadTracksAndDecrypt(new Set([track.id]), chromeDownload);
+      const set = new Set([track.id]);
+      await downloaderRef.current.DownloadTracksAndDecrypt(set, chromeDownload);
     } else {
       console.error('No access token or downloader available');
     }

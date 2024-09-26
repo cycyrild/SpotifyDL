@@ -18,7 +18,7 @@ export class FFMPEGTool {
         this.mutex = new Mutex();
     }
 
-    public static async create(): Promise<FFMPEGTool> {
+    public static async Create(): Promise<FFMPEGTool> {
         const ffmpeg = new FFmpeg();
         const isFirst = await ffmpeg.load({
             coreURL: FFMPEG_CORE,
@@ -111,7 +111,12 @@ export class FFMPEGTool {
                 await this.ffmpeg.writeFile(coverFilename, track.coverFileData);
             }
 
-            await this.ffmpegExecute(audioInputFilename, audioOutputFilename, coverFilename, track.metadata, track.ffmpegDecryptionKey);
+            await this.ffmpegExecute(
+                audioInputFilename,
+                audioOutputFilename,
+                coverFilename,
+                track.metadata,
+                track.decryptionKey.type === "ffmpeg"? track.decryptionKey.key : undefined);
 
             const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
 

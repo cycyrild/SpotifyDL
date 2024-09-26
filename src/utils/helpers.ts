@@ -42,7 +42,6 @@ export function chromeDownload(file: Uint8Array, extension: string, name: string
     if (downloadId) {
       chrome.downloads.onChanged.addListener(function (delta) {
         if (delta.id === downloadId && delta.state && delta.state.current === 'complete') {
-          console.log('Download completed!');
           URL.revokeObjectURL(blobUrl);
         }
       });
