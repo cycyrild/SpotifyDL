@@ -3,18 +3,10 @@ import { ProgressCallback } from "./fetch-helpers";
 export type UIUpdateCallback = (
     overallProgress: number,
     remainingItems: number,
-    progressStates: { [id: string]: FileProgressStateImpl }
+    progressStates: { [id: string]: FileProgressState }
 ) => void;
 
-interface FileProgressState {
-    downloadProgress: number;
-    decrypted: boolean;
-    saved: boolean;
-    finished: boolean;
-    progress(): number;
-}
-
-export class FileProgressStateImpl implements FileProgressState {
+export class FileProgressState {
     downloadProgress: number = 0;
     decrypted: boolean = false;
     saved: boolean = false;
@@ -38,8 +30,9 @@ export class FileProgressStateImpl implements FileProgressState {
     }
 }
 
+
 export class TrackDownloadManager {
-    private progressStates: { [id: string]: FileProgressStateImpl } = {};
+    private progressStates: { [id: string]: FileProgressState } = {};
 
     constructor(private uiUpdateCallback: UIUpdateCallback) { }
 
@@ -47,7 +40,7 @@ export class TrackDownloadManager {
         if (this.progressStates[id] && !this.progressStates[id].complete()) {
             throw new Error("File initialized and not completed");
         }
-        this.progressStates[id] = new FileProgressStateImpl();
+        this.progressStates[id] = new FileProgressState();
         this.reportGlobalProgress();
     }
 

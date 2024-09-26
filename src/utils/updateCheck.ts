@@ -17,7 +17,7 @@ async function getLatestVersion(repo: string): Promise<string> {
         const latestVersion = data.tag_name;
         return latestVersion;
     } catch (error) {
-        console.error(`Error retrieving latest version for ${repo}: ${error}`);
+        console.error(`Error retrieving latest version for ${repo}: ${error}`, error);
         throw error;
     }
 }

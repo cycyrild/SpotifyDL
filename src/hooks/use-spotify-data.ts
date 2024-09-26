@@ -1,20 +1,22 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import Downloader from '../downloader';
+import { Downloader } from '../downloader';
 import { getAccessToken } from '../spotifyauth';
-import { UIUpdateCallback, FileProgressStateImpl } from '../utils/download-manager';
+import { UIUpdateCallback, FileProgressState } from '../utils/download-manager';
 import {SpotifyAPI} from "../spotify-api/spotify-api";
 import { TracksCommonFields, MediaType } from '../spotify-api/interfaces';
+import * as userSettings from '../utils/userSettings';
 
 const useSpotifyData = () => {
-    const [tracksCommonFields, setTracksCommonFields] = useState<TracksCommonFields | undefined>();
+    const [tracksCommonFields, setTracksCommonFields] = useState<TracksCommonFields>();
     const [loading, setLoading] = useState<boolean>(true);
     const [overallProgress, setOverallProgress] = useState<number>(100);
     const [remainingItems, setRemainingItems] = useState<number>(0);
-    const [progressDetails, setProgressDetails] = useState<{ [id: string]: FileProgressStateImpl }>({});
-
+    const [progressDetails, setProgressDetails] = useState<{ [id: string]: FileProgressState }>({});
     const [error, setError] = useState<string | null>(null);
-    const spotifyAccessToken = useRef<string | null>(null);
-    const downloaderRef = useRef<Downloader | null>(null);
+
+    const currentSettings = useRef(userSettings.defaultSettings);
+    const spotifyAccessToken = useRef<string>("");
+    const downloaderRef = useRef<Downloader>();
 
     const normalizeError = (err: any) => {
         if (err instanceof Error) {
@@ -56,15 +58,20 @@ const useSpotifyData = () => {
                 throw new Error("Unable to retrieve current URL.");
             }
 
-            const downloaderLoadTask = Downloader.Create(downloadState);
+            const settings = await userSettings.loadSettings();
+            currentSettings.current = settings;
 
             const token = await getAccessToken();
 
-            if(!token) {
+
+            if(!token || !token.accessToken) {
                 throw new Error("Please log in to Spotify to use this extension.");
             }
 
             spotifyAccessToken.current = token.accessToken;
+
+            const downloaderLoadTask = Downloader.Create(downloadState, currentSettings, spotifyAccessToken);
+
 
             const medias = getIdFromUrl(url);
             let tracksCommonFields: TracksCommonFields;
@@ -83,6 +90,9 @@ const useSpotifyData = () => {
                 case MediaType.Track:
                     tracksCommonFields = await SpotifyAPI.getTrack(medias[1], spotifyAccessToken.current);
                     break;
+
+                default:
+                    throw new Error(`Unsupported media type: ${medias[0]}`);
             }
 
             downloaderRef.current = await downloaderLoadTask;
@@ -90,7 +100,7 @@ const useSpotifyData = () => {
             setLoading(false);
         } catch (error) {
             const normalizedError = normalizeError(error);
-            console.error(normalizedError.message);
+            console.error(normalizedError.message, error);
             setError(normalizedError.message);
             setLoading(false);
         }
@@ -109,6 +119,7 @@ const useSpotifyData = () => {
         remainingItems,
         progressDetails,
         error,
+        currentSettings,
     };
 };
 

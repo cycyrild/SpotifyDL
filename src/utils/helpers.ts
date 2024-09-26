@@ -1,6 +1,6 @@
 //import { FileDownloadData } from "./fetch-helpers";
 
-export async function limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+/*export async function limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: T[] = [];
   let currentIndex = 0;
   let activePromises = 0;
@@ -28,7 +28,7 @@ export async function limitedPromiseAll<T>(tasks: (() => Promise<T>)[], limit: n
 
     enqueue();
   });
-}
+}*/
 
 /*export function toHexString(byteArray: Uint8Array): string {
   return Array.from(byteArray, (byte: number) => {
