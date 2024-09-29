@@ -15,6 +15,21 @@ export interface RetryOptions {
     delay: number;
 }
 
+/*export function mapVorbisToAAC(format: AudioFormat): OutputSettings | null {
+    switch (format) {
+        case AudioFormat.MP4_128:
+        case AudioFormat.MP4_256:
+            throw new Error('Already AAC')
+        case AudioFormat.OGG_VORBIS_320:
+            return { codec: 'AAC', container: 'MP4', bitrate: 256 };
+        case AudioFormat.OGG_VORBIS_160:
+            return { codec: 'AAC', container: 'MP4', bitrate: 128 };
+        case AudioFormat.OGG_VORBIS_96:
+            return { codec: 'AAC', container: 'MP4', bitrate: 96 };
+    }
+}*/
+
+
 export function isValidSettings(settings: any): settings is Settings {
     return (
         settings &&
