@@ -2,8 +2,10 @@
 
 <img src="img1.png" style="width:700px;"/>
 
-## Description
-Allows users to download track, playlist or album Spotify from the browser.
+
+### Allows users to download track, playlist or album Spotify from the browser.
+> This extension is built using **Manifest V3**, you can check the permissions directly in the manifest.json
+
 
 - Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**. *[source](https://git.gay/uhwot/unplayplay)*
 
@@ -22,10 +24,10 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 [~] *Done for PlayPlay* - **Migrate decryption from node-forge to WebCrypto for Widevine** to improve performance and prevent UI freezing.
 
-[ ] **Add user settings for audio container and codec selection**  
+☐ **Add user settings for audio container and codec selection**  
   Allow users to choose the audio container and/or codec when using FFmpeg by adding corresponding settings in the user interface.
 
-[ ] **Improve error logging and add user-friendly error popups**  
+☐ **Improve error logging and add user-friendly error popups**  
   Enhance error logging mechanisms and implement UI popups that inform users of errors in a clear and user-friendly way.
 
 
