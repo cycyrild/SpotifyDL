@@ -22,10 +22,10 @@ Allows users to download track, playlist or album Spotify from the browser.
 
 [~] *Done for PlayPlay* - **Migrate decryption from node-forge to WebCrypto for Widevine** to improve performance and prevent UI freezing.
 
-[&check;] **Add user settings for audio container and codec selection**  
+[ ] **Add user settings for audio container and codec selection**  
   Allow users to choose the audio container and/or codec when using FFmpeg by adding corresponding settings in the user interface.
 
-[&check;] **Improve error logging and add user-friendly error popups**  
+[ ] **Improve error logging and add user-friendly error popups**  
   Enhance error logging mechanisms and implement UI popups that inform users of errors in a clear and user-friendly way.
 
 
