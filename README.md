@@ -1,4 +1,6 @@
 # SpotifyDL Chrome Extension
+### Spotify has banned the PlayPlay token and intent key, this needs to be updated.
+### You can still use AAC download with a valid Widevine device.
 <img src="img1.png" style="width:700px;"/>
 
 ## Description
