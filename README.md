@@ -5,7 +5,7 @@
 ## Description
 Allows users to download track, playlist or album Spotify from the browser.
 
-- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**.
+- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**. *[source](https://git.gay/uhwot/unplayplay)*
 
 - Using **Widevine CDM** for **AAC (128, 256 Kbits/s)**.
 
