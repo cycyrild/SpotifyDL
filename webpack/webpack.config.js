@@ -7,7 +7,7 @@ module.exports = (env, argv) => {
 
     return {
         mode: isProduction ? 'production' : 'development',
-        target: ['web'],
+        target: ['web', 'es2021'],
         entry: {
             app: path.resolve(__dirname, "..", "src", "index.tsx"),
             background: path.resolve(__dirname, "..", "src", "background.ts")
@@ -55,7 +55,7 @@ module.exports = (env, argv) => {
               patterns: [{ from: '.', to: '.', context: 'public' }]
             }),
             new ESLintPlugin({
-              extensions: ['ts', 'js'],
+              extensions: ['ts', 'js', 'tsx'],
               fix: true
             })
           ]

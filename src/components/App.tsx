@@ -5,14 +5,11 @@ import * as Helpers from '../utils/helpers';
 import { MediaType } from '../spotify-api/interfaces';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear, faStream, faCompactDisc, faMusic, faFile, faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faStream, faCompactDisc, faMusic, faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
-import { TracksCommonFields, } from '../spotify-api/interfaces';
 import { DownloadResult } from '../downloader';
 import { isUpdated } from '../utils/updateCheck';
 import { TrackObjectSimplified } from '../spotify-api/spotify-types';
-import { AudioFormat, AudioFormatUtil } from '../audioformats';
-import * as userSettings from '../utils/userSettings';
 import LoadingComponent from './Loading';
 import CriticalErrorComponent from './Error';
 import { removeAccessTokenFromCache } from '../spotifyauth';
@@ -22,7 +19,6 @@ const App: React.FC = () => {
   const
   {
     tracksCommonFields: tracksCommonFields,
-    spotifyAccessToken: spotifyAccessToken,
     loading: loadingShow,
     downloaderRef: downloaderRef,
     overallProgress: overallProgress,
@@ -36,6 +32,7 @@ const App: React.FC = () => {
   const [settingsShow, setSettingsOpen] = React.useState(false);
 
   const bottomStyles = {
+    "--progress-opacity": remainingItems == 0 ? "0" : "1",
     "--progress": `${overallProgress}%`,
     "--bg-color": !loadingShow && !errorShow ? (remainingItems == 0 ? "var(--bg-ready)" : "var(--bg-progress)") : "var(--bg-disabled)"
   } as React.CSSProperties;
@@ -110,7 +107,7 @@ const App: React.FC = () => {
   return (
     <>
       <div className="top top-elt ui-bar">
-        <h1>SPOTIFY DL</h1>
+        <h1>SpotifyDL</h1>
       </div>
 
       {tracksCommonFields &&

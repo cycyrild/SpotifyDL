@@ -2,15 +2,12 @@ import React from 'react';
 import * as styles from './Track.module.css';
 import { TrackObjectSimplified, ImageObject, TrackObjectFull } from "../spotify-api/spotify-types";
 import { CommonFields } from '../spotify-api/interfaces';
-import { FileProgressStateImpl } from "../utils/download-manager"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faInfo } from '@fortawesome/free-solid-svg-icons';
-import TrackInfo from './TrackInfo';
+import { FileProgressState } from "../utils/download-manager";
 
 export interface TrackProps<T extends TrackObjectSimplified> {
     track: T;
     commonFields: CommonFields;
-    progress: FileProgressStateImpl | undefined;
+    progress: FileProgressState | undefined;
     trackPlay: (track: T) => Promise<void>;
 }
 
@@ -42,7 +39,7 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
 
     const trackArtistsStrg = track.artists.map(x => x.name).join(' ');
 
-    const [moreInfoOpen, setMoreInfoOpen] = React.useState(false);
+    //const [moreInfoOpen, setMoreInfoOpen] = React.useState(false);
 
     const trackEltStyle =
         {
@@ -51,14 +48,14 @@ const Track: React.FC<TrackProps<TrackObjectSimplified>> = ({ track, commonField
             "--trackHeadBg": `var(${progress ? (!progress.complete() ? "--bgInProgress" : (!progress.error ? "--bgComplete" : "--bgError")) : "--bgDefault"})`
         } as React.CSSProperties;
 
-    const handleInfoClick = (event: any) => {
+    /*const handleInfoClick = (event: any) => {
         event.stopPropagation();
         setMoreInfoOpen(!moreInfoOpen);
-    };
+    };*/
 
-
+    //${moreInfoOpen ? styles.open : ''}
     return (
-        <div className={`${styles.trackElt} ${moreInfoOpen ? styles.open : ''}`} >
+        <div className={`${styles.trackElt}`} >
             <div className={styles.trackHead} onClick={async () => await trackPlay(track)} style={trackEltStyle}>
                 <img loading='lazy' className={styles.square} src={getImgSrc()} />
 

@@ -3,14 +3,14 @@ import { Interactivity, PlayPlayLicenseRequest, ContentType, PlayPlayLicenseResp
 import { SpotifyAPI } from "./spotify-api/spotify-api";
 import { RetryOptions } from "./utils/userSettings";
 import { Buffer } from "buffer";
-import { PlayPlayDecrypt } from "./playplay/playplayDecrypt";
-//import forge from 'node-forge';
+import { PlayPlayKey } from "./playplay/playplay-key";
 
-const REQUEST_TOKEN = Buffer.from("01e132cae527bd21620e822f58514932", "hex");
+const REQUEST_TOKEN = Buffer.from("0140167F71D3960528154B12774434D0", "hex");
 const NONCE = '72e067fbddcbcf77';
 const INITIAL_VALUE = 'ebe8bc643f630d93';
+const counter = Buffer.from(NONCE + INITIAL_VALUE, 'hex');
 
-export async function getKey(fileId: string, accessToken: string, playPlayDecrypt: PlayPlayDecrypt, retryOptions: RetryOptions): Promise<string> {
+export async function getKey(fileId: string, accessToken: string, playPlayDecrypt: PlayPlayKey, retryOptions: RetryOptions): Promise<string> {
   const playplayLicenseRequest = PlayPlayLicenseRequest.create({
     version: 2,
     token: REQUEST_TOKEN,
@@ -45,8 +45,6 @@ export async function decipherData(encryptedData: Buffer, keyStrg: string): Prom
     false,
     ['decrypt']
   );
-
-  const counter = Buffer.from(NONCE + INITIAL_VALUE, 'hex');
 
   const decryptedArrayBuffer = await crypto.subtle.decrypt(
     {

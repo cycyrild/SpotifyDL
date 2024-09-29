@@ -8,7 +8,7 @@ import { DecryptionKey, TrackData } from "./trackdata";
 import { AudioFormatUtil } from "./audioformats";
 import { Settings } from "./utils/userSettings"
 import { DownloadQueue } from "./utils/download-queue"
-import { PlayPlayDecrypt } from "./playplay/playplayDecrypt";
+import { PlayPlayKey } from "./playplay/playplay-key";
 import * as PlayPlayHelper from "./playplay_helper"
 import * as WidevineHelper from "./widevine_helper"
 import * as FetchHelpers from "./utils/fetch-helpers"
@@ -28,7 +28,7 @@ export class Downloader {
   private ffmpegTool?: FFMPEGTool;
   private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
-  private playplayDecrypt?: PlayPlayDecrypt;
+  private playplayDecrypt?: PlayPlayKey;
   private downloadQueue: DownloadQueue<string|undefined>;
   private settings: React.MutableRefObject<Settings>;
   private accessToken: React.MutableRefObject<string>;
@@ -51,7 +51,7 @@ export class Downloader {
     const [ffmpegTool, deviceBytes, playplayDecrypt] = await Promise.all([
       FFMPEGTool.Create(),
       FetchHelpers.fetchAsBuffer(DEVICE_URL),
-      PlayPlayDecrypt.Create()
+      PlayPlayKey.Create()
     ]);
     this.ffmpegTool = ffmpegTool;
     this.device = DeviceV2.parse(deviceBytes);
