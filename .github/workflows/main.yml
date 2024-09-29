@@ -20,20 +20,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: List files in workspace
-        run: ls -al
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm install
 
       - name: Build the project
         run: npm run build
+
+      - name: List files after build
+        run: ls -al ./dist
+
+      - name: Upload dist folder as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-folder
+          path: ./dist
