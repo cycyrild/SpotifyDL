@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 
 const OggS = Buffer.from("OggS", "utf-8");
 const OggStart = Buffer.from([0x00, 0x02]);
-const Zeroes = Buffer.alloc(10, 0x00); // 10 octets de zéros
+const Zeroes = Buffer.alloc(10, 0x00);
 
 export function rebuildOgg(buffer: Buffer) {
 

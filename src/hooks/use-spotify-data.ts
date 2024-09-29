@@ -9,7 +9,7 @@ import * as userSettings from '../utils/userSettings';
 const useSpotifyData = () => {
     const [tracksCommonFields, setTracksCommonFields] = useState<TracksCommonFields>();
     const [loading, setLoading] = useState<boolean>(true);
-    const [overallProgress, setOverallProgress] = useState<number>(100);
+    const [overallProgress, setOverallProgress] = useState<number>(0);
     const [remainingItems, setRemainingItems] = useState<number>(0);
     const [progressDetails, setProgressDetails] = useState<{ [id: string]: FileProgressState }>({});
     const [error, setError] = useState<string | null>(null);

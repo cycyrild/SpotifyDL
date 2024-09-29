@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { AudioFormat, AudioFormatUtil } from '../audioformats';
+import React from 'react';
+import { AudioFormat } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
 import { Settings, isValidSettings } from '../utils/userSettings';
 import * as style from './Settings.module.css';

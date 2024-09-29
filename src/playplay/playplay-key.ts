@@ -1,6 +1,6 @@
 import { Mutex } from 'async-mutex';
 
-export class PlayPlayDecrypt {
+export class PlayPlayKey {
     private playPlayModule: any;
     private mutex: Mutex;
 
@@ -15,7 +15,7 @@ export class PlayPlayDecrypt {
         const { default: PlayPlayModule } = await import('./playplaymodule/playplaymodule.js');
         
         const playPlayModule = await PlayPlayModule();
-        return new PlayPlayDecrypt(playPlayModule);
+        return new PlayPlayKey(playPlayModule);
     }
 
     public async processKeys(fileId: Uint8Array, obfuscatedKey: Uint8Array): Promise<Uint8Array> {

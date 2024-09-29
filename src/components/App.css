@@ -51,9 +51,10 @@ h1 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: calc(0.7 * var(--real-height));
+    font-size: calc(0.65 * var(--real-height));
     margin: 0;
     max-width: 75%;
+    letter-spacing: 2px;
 }
 
 .middle {
@@ -108,7 +109,8 @@ h1 {
     height: 100%;
     background: var(--bg-color);
     transform: translateX(calc(-100% + var(--progress)));
-    transition: transform ease 150ms;
+    transition: transform ease 150ms, opacity ease 250ms;
+    opacity: var(--progress-opacity);
 }
 
 .button-section {

@@ -1,4 +1,3 @@
-/*SOURCE: https://git.gay/uhwot/unplayplay/src/branch/main/src/defs.h*/
 #if defined(__GNUC__)
   typedef          long long ll;
   typedef unsigned long long ull;
@@ -177,7 +176,7 @@ typedef int bool;       // we want to use bool in our C programs
 #ifdef __cplusplus
 
 // compile time assertion
-#define CASSERT(cnd) static_assert(cnd, #cnd " failed")
+#define CASSERT(cnd) static_assert(cnd)
 
 // check that unsigned multiplication does not overflow
 template<class T> bool is_mul_ok(T count, T elsize)
