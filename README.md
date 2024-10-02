@@ -2,8 +2,8 @@
 
 <img src="img1.png" style="width:700px;"/>
 
-## Spotify just patched Playplay decryption ... needs to be updated.
-
+### ‼️ Spotify just patched Playplay decryption ... needs to be updated. ‼️
+#
 ### Allows users to download track, playlist or album Spotify from the browser.
 > This extension is built using **Manifest V3**, you can check the permissions directly in the manifest.json
 
