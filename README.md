@@ -1,12 +1,12 @@
 # SpotifyDL Chrome Extension
 
-<img src="img1.png" style="width:700px;"/>
+<img src="img1.png" style="width:500px;"/>
 
 ### Allows users to download track, playlist or album Spotify from the browser.
 > This extension is built using **Manifest V3**, you can check the permissions directly in the manifest.json
 
 
-- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**. *[source](https://git.gay/uhwot/unplayplay)*
+- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**. *[source](https://github.com/es3n1n/re-unplayplay)*
 
 - Using **Widevine CDM** for **AAC (128, 256 Kbits/s)**.
 
@@ -74,6 +74,12 @@ You have **two options** to install the extension:
 4. The extension will analyze the current page and display the list of tracks available for download.
 5. Select the tracks you want to download and click.
 6. The selected tracks will be downloaded to your device with complete metadata.
+
+## Screenshots
+<img src="img1.png" style="width:700px;"/>
+<img src="img2.png" style="width:700px;"/>
+<img src="img3.png" style="width:700px;"/>
+
 
 
 ## Disclaimer
