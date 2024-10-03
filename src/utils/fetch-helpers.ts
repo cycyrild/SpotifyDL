@@ -20,7 +20,7 @@ export async function fetchWithRetry(url: string, retryOptions: RetryOptions, in
             return response;
         } catch (error) {
             if (attempt === retryOptions.retries || !(error instanceof Error) || (error.message && !error.message.includes('429'))) {
-                throw new Error(`Failed to fetch ${url} after ${retryOptions.retries + 1} attempts: ${(error as Error).message}`);
+                throw new Error(`Failed to fetch ${url} after ${attempt + 1} attempts: ${(error as Error).message}`);
             }
 
             const retryDelay = retryOptions.delay * Math.pow(2, attempt) + Math.random() * 100;

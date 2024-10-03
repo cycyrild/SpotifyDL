@@ -5,7 +5,7 @@ import { RetryOptions } from "./utils/userSettings";
 import { Buffer } from "buffer";
 import { PlayPlayKey } from "./playplay/playplay-key";
 
-const REQUEST_TOKEN = Buffer.from("0140167F71D3960528154B12774434D0", "hex");
+const REQUEST_TOKEN = Buffer.from([0x1, 0x5c, 0x88, 0x1, 0x57, 0x76, 0x20, 0xd7, 0xd4, 0x6d, 0xe9, 0xd6, 0x96, 0xbb, 0x95, 0x74]);
 const NONCE = '72e067fbddcbcf77';
 const INITIAL_VALUE = 'ebe8bc643f630d93';
 const counter = Buffer.from(NONCE + INITIAL_VALUE, 'hex');
