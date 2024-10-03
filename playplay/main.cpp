@@ -1,17 +1,16 @@
-#include "main.h"
 #include <cstring>
 #include <cstdint>
+#include <unplayplay.hpp>
+
 extern "C"
 {
-    uint8_t *process_keys(const uint8_t *file_id, const uint8_t *obfuscated_key)
+    uint8_t *process_keys(const uint8_t *fileId, const uint8_t *obfuscatedKey)
     {
-        static uint8_t bound_key[16];
-        char decrypted_key[16];
+        unplayplay::FileId fileIdBuffer(fileId, unplayplay::detail::kFileIdSize);
+        unplayplay::Key obfuscatedKeyBuffer(obfuscatedKey, unplayplay::detail::kKeySize);
 
-        decrypt_main(obfuscated_key, (uint8_t *)decrypted_key);
+        const unplayplay::Key boundKeyBuffer = unplayplay::decrypt_and_bind_key(obfuscatedKeyBuffer, fileIdBuffer);
 
-        bind_key((const uint8_t *)decrypted_key, file_id, bound_key);
-
-        return bound_key;
+        return const_cast<uint8_t *>(boundKeyBuffer.data());
     }
 }
