@@ -27,10 +27,9 @@ export class FFMPEGTool {
             workerURL: FFMPEG_WORKER
         });
 
-        /*ffmpeg.on('log', ({ type, message }) => {
-            console.log(type);
-            console.log(message);
-        });*/
+        // ffmpeg.on('log', ({ /*type, */message }) => {
+        //     console.log(message);
+        // });
 
         if (!isFirst)
             throw new Error("An instance of ffmpeg has already been initialized");
@@ -46,7 +45,7 @@ export class FFMPEGTool {
         coverFilename?: string,
         decryptionKey?: string) {
 
-        function convertToISO8601(date: any ) {
+        function convertToISO8601(date: any) {
             const year = date.year;
             const month = date.month ? String(date.month).padStart(2, '0') : '01';
             const day = date.day ? String(date.day).padStart(2, '0') : '01';
@@ -84,6 +83,8 @@ export class FFMPEGTool {
             { key: 'disc', value: metadata.disc_number },
             { key: 'track', value: metadata.number },
             { key: 'composer', value: composer ? composer.artist_name : '' },
+            { key: 'copyright', value: metadata.album.label },
+            { key: 'year', value: metadata.album.date.year },
         ];
 
         metadataArgs.forEach(arg => {
@@ -100,7 +101,7 @@ export class FFMPEGTool {
             if (error != 0) {
                 throw new Error(`FFmpeg execution failed with code: ${error}`);
             }
-        } catch (e:any) {
+        } catch (e: any) {
             console.error("FFmpeg execution encountered an error:", e);
             throw new Error(`FFmpeg runtime error: ${e.messag}`);
         }

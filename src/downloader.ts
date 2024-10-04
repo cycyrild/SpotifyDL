@@ -14,6 +14,7 @@ import * as WidevineHelper from "./widevine_helper"
 import * as FetchHelpers from "./utils/fetch-helpers"
 import * as Metadata from "./spotify-api/metadata";
 import * as Ogg from "./audiofix/ogg"
+import { mapToMatroskaContainer, mapToMP4AAC } from "./utils/audioOutput";
 
 const DEVICE_URL = 'device.wvd';
 
@@ -149,7 +150,7 @@ export class Downloader {
       if (AudioFormatUtil.isVorbis(this.settings.current.format))
         Ogg.rebuildOgg(track.trackFiledata);
 
-      const outputSettings = this.settings.current.getOutputSettings(track.audioFormat);
+      const outputSettings = this.settings.current.convertToMP4AAC ? mapToMP4AAC(track.audioFormat) : mapToMatroskaContainer(this.settings.current.format);
 
       const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, outputSettings);
       this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
