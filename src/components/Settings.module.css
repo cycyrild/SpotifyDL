@@ -1,31 +1,46 @@
 .settings {
-
+    --padding: 10px;
     background-color: rgb(255 255 255 / 50%);
-    height: 50%;
-    padding: 10px;
+    height: calc(100% - 2 * var(--padding));
+    padding: var(--padding);
     border-radius: 10px;
     backdrop-filter: blur(5px);
-
+    overflow: auto;
 }
 
-
 .settingsGrid {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     width: 100%;
-    margin: 0 0 1% 0;
+    margin: 0 0 2vh 0;
+    display: grid;
+    grid-template-columns: 1fr max(150px, 25%);
+    gap: 10px;
+    overflow: hidden;
 }
 
 .label {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    flex-grow: 1;
 }
 
-.value {}
+.value {
+    display: flex;
+    justify-content: flex-end;
+}
 
 .titleSettings {
     margin: 2% 0;
+}
+
+.settingsFields {
+    width: 100%;
+}
+
+.settingsInformation {
+    width: 100%;
+}
+
+.horizontalRule {
+    margin-block-start: 1.25em;
+    margin-block-end: 1.25em;
 }

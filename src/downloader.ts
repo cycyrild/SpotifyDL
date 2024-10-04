@@ -29,14 +29,14 @@ export class Downloader {
   private device?: DeviceV2;
   private trackDownloadManager: TrackDownloadManager;
   private playplayDecrypt?: PlayPlayKey;
-  private downloadQueue: DownloadQueue<string|undefined>;
+  private downloadQueue: DownloadQueue<string | undefined>;
   private settings: React.MutableRefObject<Settings>;
   private accessToken: React.MutableRefObject<string>;
 
   private constructor(uiUpdateCallback: UIUpdateCallback, settings: React.MutableRefObject<Settings>, accessToken: React.MutableRefObject<string>) {
 
     this.trackDownloadManager = new TrackDownloadManager(uiUpdateCallback);
-    this.downloadQueue = new DownloadQueue<string|undefined>(settings);
+    this.downloadQueue = new DownloadQueue<string | undefined>(settings);
     this.settings = settings;
     this.accessToken = accessToken;
   }
@@ -95,7 +95,7 @@ export class Downloader {
       if (!this.device)
         throw new Error(`Widevine device not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-      
+
       const ffmpegDecryptionKey = await WidevineHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.device, this.settings.current.retryOptions);
       decryptionKey = {
         type: "ffmpeg",
@@ -106,7 +106,7 @@ export class Downloader {
       if (!this.playplayDecrypt)
         throw new Error(`PlayPlay decrypt not initialized`);
       downloadTrackTask = FetchHelpers.fetchAsBufferProgress(streamUrl, trackId, this.trackDownloadManager.trackDownloadProgressCallback);
-      
+
       const aesDecryptionKey = await PlayPlayHelper.getKey(fileToDownload.file_id, this.accessToken.current, this.playplayDecrypt, this.settings.current.retryOptions);
       decryptionKey = {
         type: "aes",
@@ -135,7 +135,7 @@ export class Downloader {
     return obj;
   }
 
-  private async postProcessTrack(id: string, saveCallback: (result: DownloadResult) => void) {
+  private async processTrack(id: string, saveCallback: (result: DownloadResult) => void) {
     try {
       if (!this.ffmpegTool) {
         throw new Error(`ffmpeg not initialized`);
@@ -149,13 +149,15 @@ export class Downloader {
       if (AudioFormatUtil.isVorbis(this.settings.current.format))
         Ogg.rebuildOgg(track.trackFiledata);
 
-      const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, this.settings.current.outputAudioContainer);
+      const outputSettings = this.settings.current.getOutputSettings(track.audioFormat);
+
+      const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, outputSettings);
       this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
 
       const elt: DownloadResult = {
         metadata: track.metadata,
         data: decryptedTrack,
-        extension: this.settings.current.outputAudioContainer
+        extension: outputSettings.container.extension
       };
 
       saveCallback(elt);
@@ -174,13 +176,13 @@ export class Downloader {
 
     this.trackDownloadManager.initializeFiles(trackIds);
 
-    const downloadTasks = Array.from(trackIds, id => async () => this.postProcessTrack(id, saveCallback));
+    const processTrackTasks = Array.from(trackIds, id => async () => this.processTrack(id, saveCallback));
 
-    this.downloadQueue.addTasks(downloadTasks).then((e) => {
+    this.downloadQueue.addTasks(processTrackTasks).then((e) => {
 
       e.forEach((id) => {
 
-        if(id)
+        if (id)
           this.trackDownloadManager.finishedCallback(id);
       });
     });

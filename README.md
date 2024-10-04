@@ -2,85 +2,91 @@
 
 <img src="img1.png" style="width:500px;"/>
 
-### Allows users to download track, playlist or album Spotify from the browser.
-> This extension is built using **Manifest V3**, you can check the permissions directly in the manifest.json
+## Overview
 
+**SpotifyDL** is a Chrome extension that allows users to download tracks, playlists, or albums directly from Spotify via their browser. The extension supports multiple audio formats and provides integrated decryption and metadata management.
 
-- Using **PlayPlay CDM** for **Ogg/Vorbis (96, 160, 320 Kbits/s)**. *[source](https://github.com/es3n1n/re-unplayplay)*
+> Built using **Manifest V3**, you can review permissions in the `manifest.json` file.
 
-- Using **Widevine CDM** for **AAC (128, 256 Kbits/s)**.
+### Key Features
 
-- **Integrated decryption** of the protected file and addition of metadata with **FFmpeg WASM**.
+- **Audio Formats Supported:**
+  - **Ogg/Vorbis** (96, 160, 320 Kbits/s) via **PlayPlay CDM** ([source](https://github.com/es3n1n/re-unplayplay))
+  - **AAC** (128, 256 Kbits/s) via **Widevine CDM**
+- **Integrated Decryption:** Decrypts protected files and adds metadata using **FFmpeg WASM**.
+- **Parallel Downloads:** Supports downloading multiple files simultaneously for faster processing.
 
-- Supports **parallel downloads**.
+> **Note:** Widevine decryption requires a valid Widevine device, including an RSA Private Key (PEM or DER format) and a Client ID Blob.
 
+For questions, bug reports, or feedback, feel free to contact me on **Discord: cyril13600**.
 
-> **Widevine decryption requires a valid Widevine device** (RSA Private Key (PEM or DER) and Client ID Blob).
+---
 
-> *For any comments, bug reports or other ... please contact me on **Discord: cyril13600***
+## Project Roadmap
 
-### Project To-Do List
+- [x] **PlayPlay** - Migrate decryption from `node-forge` to `WebCrypto` to enhance performance and prevent UI freezing.
+- [x] **MP4 AAC** - Add user settings for audio container and codec selection. Users can now choose the audio format when using FFmpeg via the settings interface.
+- [ ] **Error Handling** - Improve error logging and implement user-friendly error popups to better inform users of issues.
 
-[~] *Done for PlayPlay* - **Migrate decryption from node-forge to WebCrypto for Widevine** to improve performance and prevent UI freezing.
+---
 
-☐ **Add user settings for audio container and codec selection**  
-  Allow users to choose the audio container and/or codec when using FFmpeg by adding corresponding settings in the user interface.
+## Installation Instructions
 
-☐ **Improve error logging and add user-friendly error popups**  
-  Enhance error logging mechanisms and implement UI popups that inform users of errors in a clear and user-friendly way.
+You have two methods to install the extension:
 
+### Option 1: Install from Releases
 
-
-## Installation
-
-You have **two options** to install the extension:
-
-1. **Download a built version from releases:**
-   - Go to the [releases](https://github.com/cycyrild/SpotifyDL/releases) page.
-   - Download the latest release.
-
-    **Unzip the downloaded file:**
-   - Extract the contents of the downloaded file. You should see a folder with a subfolder named `dist`.
-
-    **Load the extension in Chrome:**
-   - Open the Chrome browser and navigate to `chrome://extensions/`.
+1. **Download the latest release** from the [releases page](https://github.com/cycyrild/SpotifyDL/releases).
+2. **Unzip the file:**  
+   After downloading, extract the contents. You should see a folder containing the `dist` subfolder.
+3. **Load the extension in Chrome:**
+   - Open Chrome and navigate to `chrome://extensions/`.
    - Enable "Developer mode" by toggling the switch in the top-right corner.
-   - Click on "Load unpacked" and select the `dist` directory which contains the `manifest.json` file.
+   - Click "Load unpacked" and select the `dist` folder containing `manifest.json`.
 
+### Option 2: Build from Source
 
-2. **Build from source:**
-   - Clone the repository:
-     ```sh
-     git clone https://github.com/cycyrild/SpotifyDL.git
-     cd SpotifyDL
-     ```
-   - Install the dependencies:
-     ```sh
-     npm install
-     ```
-   - Compile the project:
-     ```sh
-     npm run build
-     ```
-   - Load the extension in Chrome:
-     - Open the Chrome browser and navigate to `chrome://extensions/`.
-     - Enable "Developer mode" by toggling the switch in the top-right corner.
-     - Click on "Load unpacked" and select the directory where the extension files are located (`dist` folder).
-     
-## Usage
-1. Log in to your Spotify account on the Spotify web player.
-2. Navigate to a track, playlist or album you want to download.
-3. Click on the SpotifyDL extension icon in the Chrome toolbar.
-4. The extension will analyze the current page and display the list of tracks available for download.
-5. Select the tracks you want to download and click.
-6. The selected tracks will be downloaded to your device with complete metadata.
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/cycyrild/SpotifyDL.git
+   cd SpotifyDL
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Compile the project:
+   ```sh
+   npm run build
+   ```
+4. Load the extension in Chrome:
+   - Open Chrome and navigate to `chrome://extensions/`.
+   - Enable "Developer mode" in the top-right corner.
+   - Click "Load unpacked" and select the `dist` folder where the compiled files are located.
+
+---
+
+## How to Use
+
+1. Log in to your Spotify account on the web player.
+2. Navigate to the track, playlist, or album you wish to download.
+3. Click the **SpotifyDL** icon in your Chrome toolbar.
+4. The extension will analyze the current page and list all available tracks for download.
+5. Select the tracks you want and click to download.
+6. The files will be saved to your device with complete metadata, including title, artist, album, etc.
+
+---
 
 ## Screenshots
+
 <img src="img1.png" style="width:700px;"/>
 <img src="img2.png" style="width:700px;"/>
 <img src="img3.png" style="width:700px;"/>
 
-
+---
 
 ## Disclaimer
-This extension is for personal use only. Downloading copyrighted material without permission is against Spotify's terms of service and may violate copyright laws. Use this extension responsibly.
+
+This extension is intended for personal use only. Downloading copyrighted content without permission is a violation of Spotify's terms of service and may also breach copyright laws. Please use this extension responsibly.
+
+---
