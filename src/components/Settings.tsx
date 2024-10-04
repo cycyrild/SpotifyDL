@@ -3,7 +3,6 @@ import { AudioFormat } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
 import { Settings, isValidSettings } from '../utils/userSettings';
 import * as style from './Settings.module.css';
-import * as audioOutput from '../utils/audioOutput';
 
 interface SettingsComponentProps {
   currentSettings: React.MutableRefObject<Settings>;
@@ -73,11 +72,9 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
             id="convert-mp4-aac-input"
             className={style.value}
             type="checkbox"
-            checked={currentSettings.current.getOutputSettings === audioOutput.mapToMP4AAC}
+            checked={currentSettings.current.convertToMP4AAC}
             onChange={
-              (e) => handleSettingChange(
-                'getOutputSettings',
-                e.target.checked ? audioOutput.mapToMP4AAC : audioOutput.mapToMatroskaContainer)
+              (e) => handleSettingChange('convertToMP4AAC',e.target.checked)
             }
           />
         </div>
@@ -86,7 +83,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
 
       <div className={style.settingsInformation}>
-        {currentSettings.current.getOutputSettings === audioOutput.mapToMatroskaContainer ?
+        {currentSettings.current.convertToMP4AAC === false ?
           <>
             <span>No audio re-encoding will be performed.</span><br />
             <span>The output file will be in a Matroska container format.</span>
