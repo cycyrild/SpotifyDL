@@ -2,6 +2,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { TrackMetadata } from '../spotify-api/metadata';
 import { TrackData } from "../trackdata"
 import { Mutex } from 'async-mutex';
+import { OutputSettings } from './audioOutput';
 
 
 const FFMPEG_CORE = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.js');
@@ -27,8 +28,8 @@ export class FFMPEGTool {
         });
 
         /*ffmpeg.on('log', ({ type, message }) => {
-            if(type === 'stderr')
-                console.error(message);
+            console.log(type);
+            console.log(message);
         });*/
 
         if (!isFirst)
@@ -37,7 +38,13 @@ export class FFMPEGTool {
             return new FFMPEGTool(ffmpeg);
     }
 
-    private async ffmpegExecute(inputFilename: string, outputFilename: string, coverFilename: string | undefined, metadata: TrackMetadata, decryptionKey: string | undefined) {
+    private async ffmpegExecute(
+        inputFilename: string,
+        outputFilename: string,
+        outputSettings: OutputSettings,
+        metadata: TrackMetadata,
+        coverFilename?: string,
+        decryptionKey?: string) {
 
         function convertToISO8601(date: any ) {
             const year = date.year;
@@ -83,7 +90,9 @@ export class FFMPEGTool {
             ffmpegArgs.push('-metadata', `${arg.key}=${arg.value}`);
         });
 
-        ffmpegArgs.push('-c:a', 'copy', outputFilename);
+        const ffmpegAudioSettings = outputSettings.generateFFmpegString();
+        ffmpegArgs.push(...ffmpegAudioSettings.split(' '));
+        ffmpegArgs.push(outputFilename);
 
         try {
             const error = await this.ffmpeg.exec(ffmpegArgs);
@@ -97,9 +106,9 @@ export class FFMPEGTool {
         }
     }
 
-    public async ProcessFiles(track: TrackData, audioContainer: string) {
+    public async ProcessFiles(track: TrackData, outputSettings: OutputSettings) {
         let coverFilename: string | undefined;
-        const audioOutputFilename = `A${track.spotifyId}.${audioContainer}`;
+        const audioOutputFilename = `A${track.spotifyId}`;
         const audioInputFilename = `B${track.spotifyId}`;
 
 
@@ -111,12 +120,15 @@ export class FFMPEGTool {
                 await this.ffmpeg.writeFile(coverFilename, track.coverFileData);
             }
 
+            const isFFMPEGdecryptionKey = track.decryptionKey.type === "ffmpeg";
+
             await this.ffmpegExecute(
                 audioInputFilename,
                 audioOutputFilename,
-                coverFilename,
+                outputSettings,
                 track.metadata,
-                track.decryptionKey.type === "ffmpeg"? track.decryptionKey.key : undefined);
+                coverFilename,
+                isFFMPEGdecryptionKey ? track.decryptionKey.key : undefined);
 
             const decryptedFile = await this.ffmpeg.readFile(audioOutputFilename);
 

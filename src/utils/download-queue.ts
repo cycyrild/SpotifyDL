@@ -17,7 +17,7 @@ export class DownloadQueue<T> {
     private enqueueTask(task: () => Promise<T>): Promise<T> {
       return new Promise((resolve, reject) => {
         const runTask = async () => {
-          if (this.runningTasks >= this.settings.current.maxDownloadConcurency) {
+          if (this.runningTasks >= this.settings.current.maxDownloadConcurrency) {
             this.taskQueue.push(runTask);
             return;
           }
