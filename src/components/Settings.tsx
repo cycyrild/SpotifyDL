@@ -1,5 +1,5 @@
 import React from 'react';
-import { AudioFormat } from '../audioformats';
+import { AudioFormat, AudioFormatUtil } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
 import { Settings, isValidSettings } from '../utils/userSettings';
 import * as style from './Settings.module.css';
@@ -26,7 +26,6 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
     forceUpdate(prev => !prev);
   }
-
 
   return (
     <div className={style.settings} id="form">
@@ -65,16 +64,16 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
           />
         </div>
         <div className={style.settingsGrid}>
-          <label className={style.label} htmlFor="convert-mp4-aac-input">
-            Convert to MP4 AAC
+          <label className={style.label} htmlFor="auto-convert-mp4-aac-input">
+            Automatically convert to MP4 AAC
           </label>
           <input
-            id="convert-mp4-aac-input"
+            id="auto-convert-mp4-aac-input"
             className={style.value}
             type="checkbox"
-            checked={currentSettings.current.convertToMP4AAC}
+            checked={currentSettings.current.autoConvertToMP4AAC}
             onChange={
-              (e) => handleSettingChange('convertToMP4AAC',e.target.checked)
+              (e) => handleSettingChange('autoConvertToMP4AAC', e.target.checked)
             }
           />
         </div>
@@ -83,15 +82,14 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
 
       <div className={style.settingsInformation}>
-        {currentSettings.current.convertToMP4AAC === false ?
+        {(currentSettings.current.autoConvertToMP4AAC === true && AudioFormatUtil.isAAC(currentSettings.current.format)) || (currentSettings.current.autoConvertToMP4AAC === false) ?
           <>
             <span>No audio re-encoding will be performed.</span><br />
-            <span>The output file will be in a Matroska container format.</span>
           </>
           :
           <>
             <span>WARNING ‼️</span><br />
-            <span>Audio will be re-encoded, which may result in a loss of quality compared to the original file.</span>
+            <span>Audio will be re-encoded {currentSettings.current.format}, which may result in a loss of quality compared to the original file.</span>
           </>
         }
       </div>

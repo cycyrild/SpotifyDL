@@ -6,7 +6,7 @@ export interface Settings {
     format: AudioFormat;
     maxDownloadConcurrency: number;
     retryOptions: RetryOptions;
-    convertToMP4AAC: boolean;
+    autoConvertToMP4AAC: boolean;
 }
 
 export interface RetryOptions {
@@ -33,7 +33,7 @@ export function isValidSettings(settings: Settings): boolean {
         typeof settings.maxDownloadConcurrency === 'number' &&
         settings.maxDownloadConcurrency > 0 &&
         isValidRetryOptions(settings.retryOptions) &&
-        typeof settings.convertToMP4AAC === 'boolean'
+        typeof settings.autoConvertToMP4AAC === 'boolean'
     );
 }
 
@@ -45,7 +45,7 @@ export const defaultSettings: Settings = {
         retries: 5,
         delay: 2500
     },
-    convertToMP4AAC: false
+    autoConvertToMP4AAC: false
 };
 
 
