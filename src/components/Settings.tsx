@@ -89,7 +89,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
           :
           <>
             <span>WARNING ‼️</span><br />
-            <span>Audio will be re-encoded {currentSettings.current.format}, which may result in a loss of quality compared to the original file.</span>
+            <span>Audio {currentSettings.current.format} will be re-encoded, which may result in a loss of quality compared to the original file.</span>
           </>
         }
       </div>
