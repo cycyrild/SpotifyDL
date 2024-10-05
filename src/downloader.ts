@@ -150,7 +150,7 @@ export class Downloader {
       if (AudioFormatUtil.isVorbis(this.settings.current.format))
         Ogg.rebuildOgg(track.trackFiledata);
 
-      const outputSettings = this.settings.current.convertToMP4AAC ? mapToMP4AAC(track.audioFormat) : mapToMatroskaContainer(this.settings.current.format);
+      const outputSettings = this.settings.current.autoConvertToMP4AAC ? mapToMP4AAC(track.audioFormat) : mapToMatroskaContainer(this.settings.current.format);
 
       const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, outputSettings);
       this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
