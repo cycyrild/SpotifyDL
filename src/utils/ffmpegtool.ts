@@ -3,6 +3,7 @@ import { TrackMetadata } from '../spotify-api/metadata';
 import { TrackData } from "../trackdata"
 import { Mutex } from 'async-mutex';
 import { OutputSettings } from './audioOutput';
+import { ProgressEventCallback } from '@ffmpeg/ffmpeg/dist/esm/types';
 
 
 const FFMPEG_CORE = chrome.runtime.getURL('/ffmpeg/ffmpeg-core.js');
@@ -38,6 +39,7 @@ export class FFMPEGTool {
     }
 
     private async ffmpegExecute(
+        progressCallback: (progress: number) => void,
         inputFilename: string,
         outputFilename: string,
         outputSettings: OutputSettings,
@@ -95,8 +97,18 @@ export class FFMPEGTool {
         ffmpegArgs.push(...ffmpegAudioSettings.split(' '));
         ffmpegArgs.push(outputFilename);
 
+        const handleProgress: ProgressEventCallback = (event: { progress: number; time: number }) => {
+            const progress = event.progress;
+            if (progress < 0 || progress > 1)
+                return;
+            progressCallback(progress * 100);
+        };
+
         try {
+
+            this.ffmpeg.on("progress", handleProgress);
             const error = await this.ffmpeg.exec(ffmpegArgs);
+            this.ffmpeg.off("progress", handleProgress);
 
             if (error != 0) {
                 throw new Error(`FFmpeg execution failed with code: ${error}`);
@@ -107,7 +119,7 @@ export class FFMPEGTool {
         }
     }
 
-    public async ProcessFiles(track: TrackData, outputSettings: OutputSettings) {
+    public async ProcessFiles(track: TrackData, outputSettings: OutputSettings, progressCallback: (progress: number) => void) {
         let coverFilename: string | undefined;
         const audioOutputFilename = `A${track.spotifyId}`;
         const audioInputFilename = `B${track.spotifyId}`;
@@ -124,6 +136,7 @@ export class FFMPEGTool {
             const isFFMPEGdecryptionKey = track.decryptionKey.type === "ffmpeg";
 
             await this.ffmpegExecute(
+                progressCallback,
                 audioInputFilename,
                 audioOutputFilename,
                 outputSettings,

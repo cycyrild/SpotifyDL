@@ -222,5 +222,5 @@ h2 span {
 .safe-area > * {
     pointer-events: auto;
     width: 80%;
-    margin: auto auto 2%;
+    margin: auto;
 }

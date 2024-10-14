@@ -82,15 +82,16 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
 
       <div className={style.settingsInformation}>
-        {(currentSettings.current.autoConvertToMP4AAC === true && AudioFormatUtil.isAAC(currentSettings.current.format)) || (currentSettings.current.autoConvertToMP4AAC === false) ?
-          <>
-            <span>No audio re-encoding will be performed.</span><br />
-          </>
-          :
-          <>
-            <span>WARNING ‼️</span><br />
-            <span>Audio {currentSettings.current.format} will be re-encoded, which may result in a loss of quality compared to the original file.</span>
-          </>
+        {
+          ((currentSettings.current.autoConvertToMP4AAC === true && AudioFormatUtil.isAAC(currentSettings.current.format)) || (currentSettings.current.autoConvertToMP4AAC === false)) ?
+            <>
+              <span>No audio re-encoding will be performed.</span><br />
+            </>
+            :
+            <>
+              <span>WARNING ‼️</span><br />
+              <span>Audio {currentSettings.current.format} will be re-encoded, which may result in a loss of quality compared to the original file.</span>
+            </>
         }
       </div>
     </div>
