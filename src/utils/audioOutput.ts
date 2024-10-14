@@ -30,7 +30,7 @@ export class OutputSettings {
 export type audioMapper = (format: AudioFormat) => OutputSettings;
 
 export const mapToMP4AAC: audioMapper = (format: AudioFormat) => {
-    const bitrateFactor = 1.25;
+    const bitrateFactor = 1.5; //ffmpeg AAC encoder sucks
     switch (format) {
         case AudioFormat.MP4_128:
             return new OutputSettings(AudioContainer.MP4_AUDIO);

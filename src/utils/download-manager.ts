@@ -8,7 +8,7 @@ export type UIUpdateCallback = (
 
 export class FileProgressState {
     downloadProgress: number = 0;
-    decrypted: boolean = false;
+    encodingProgress: number = 0;
     saved: boolean = false;
     finished: boolean = false;
     error: boolean = false;
@@ -19,16 +19,17 @@ export class FileProgressState {
 
     progress(): number {
         let fileProgress = 0;
-        fileProgress += (this.downloadProgress / 100) * (2 / 3);
-        if (this.decrypted) fileProgress += 1 / 6;
-        if (this.saved) fileProgress += 1 / 6;
+        fileProgress += (this.downloadProgress / 100) * 0.7; // 70%
+        fileProgress += (this.encodingProgress / 100) * 0.25; // 25%
+        if (this.saved) fileProgress += 0.05; // 5%
         return fileProgress;
     }
 
     complete(): boolean {
-        return (this.downloadProgress === 100 && this.decrypted && this.saved) || this.error;
+        return (this.downloadProgress === 100 && this.encodingProgress === 100 && this.saved) || this.error;
     }
 }
+
 
 export class TrackDownloadManager {
     private progressStates: { [id: string]: FileProgressState } = {};
@@ -54,12 +55,12 @@ export class TrackDownloadManager {
         this.reportGlobalProgress();
     };
 
-    public encodingProgressCallback = (id: string) => {
+    public encodingProgressCallback = (id: string, loaded: number) => {
         if (!this.progressStates[id]) {
             throw new Error("File needs to be initialized first");
         }
 
-        this.progressStates[id].decrypted = true;
+        this.progressStates[id].encodingProgress = loaded;
         this.reportGlobalProgress();
     };
 

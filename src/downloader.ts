@@ -152,8 +152,9 @@ export class Downloader {
 
       const outputSettings = this.settings.current.autoConvertToMP4AAC ? mapToMP4AAC(track.audioFormat) : mapToMatroskaContainer(this.settings.current.format);
 
-      const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, outputSettings);
-      this.trackDownloadManager.encodingProgressCallback(track.spotifyId);
+      const encodingProgressCallback =((progress: number) => this.trackDownloadManager.encodingProgressCallback(track.spotifyId, progress));
+      const decryptedTrack = await this.ffmpegTool.ProcessFiles(track, outputSettings, encodingProgressCallback);
+
 
       const elt: DownloadResult = {
         metadata: track.metadata,
