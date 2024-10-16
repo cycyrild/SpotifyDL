@@ -1,6 +1,6 @@
 {
     "name": "SpotifyDL",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "manifest_version": 3,
     "background": {
         "service_worker": "background.js"
@@ -11,12 +11,14 @@
     "permissions": [
         "activeTab",
         "downloads",
-        "storage"
+        "storage",
+        "declarativeNetRequestWithHostAccess"
     ],
     "host_permissions": [
         "https://*.spotify.com/*",
         "https://*.scdn.co/*",
-        "https://*.akamaized.net/*"
+        "https://*.akamaized.net/*",
+        "https://*.spotifycdn.com/*"
     ],
     "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
