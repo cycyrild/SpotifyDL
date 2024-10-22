@@ -1,9 +1,10 @@
-import * as style from "./TrackInfo.module.css"
-import React from "react"
+import style from "./TrackInfo.module.css";
+import React from "react";
 
-
-export default () => {
+const TrackInfo = () => {
     return (
         <span className={style.title}>Track info</span>
-    )
+    );
 };
+
+export default TrackInfo;

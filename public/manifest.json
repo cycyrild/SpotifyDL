@@ -11,8 +11,7 @@
     "permissions": [
         "activeTab",
         "downloads",
-        "storage",
-        "declarativeNetRequestWithHostAccess"
+        "storage"
     ],
     "host_permissions": [
         "https://*.spotify.com/*",

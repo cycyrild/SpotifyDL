@@ -1,4 +1,4 @@
-import * as style from "./Error.module.css"
+import style from "./Error.module.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import React from "react"
