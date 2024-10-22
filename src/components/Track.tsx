@@ -1,5 +1,5 @@
 import React from 'react';
-import * as styles from './Track.module.css';
+import styles  from './Track.module.css';
 import { TrackObjectSimplified, ImageObject, TrackObjectFull } from "../spotify-api/spotify-types";
 import { CommonFields } from '../spotify-api/interfaces';
 import { FileProgressState } from "../utils/download-manager";

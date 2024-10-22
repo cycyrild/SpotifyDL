@@ -2,7 +2,7 @@ import React from 'react';
 import { AudioFormat, AudioFormatUtil } from '../audioformats';
 import * as userSettings from '../utils/userSettings';
 import { Settings, isValidSettings } from '../utils/userSettings';
-import * as style from './Settings.module.css';
+import style from './Settings.module.css';
 
 interface SettingsComponentProps {
   currentSettings: React.MutableRefObject<Settings>;

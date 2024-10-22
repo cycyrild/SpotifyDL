@@ -1,4 +1,4 @@
-import * as style from "./Loading.module.css"
+import style from "./Loading.module.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
