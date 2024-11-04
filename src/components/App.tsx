@@ -5,7 +5,7 @@ import * as Helpers from '../utils/helpers';
 import { MediaType } from '../spotify-api/interfaces';
 import './App.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear, faStream, faCompactDisc, faMusic, faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faListMusic, faMusic, faArrowsRotate, faAlbum } from '@lib/pro-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { DownloadResult } from '../downloader';
 import { isUpdated } from '../utils/updateCheck';
@@ -85,10 +85,10 @@ const App: React.FC = () => {
   const getIcon = (type: MediaType) => {
     switch (type) {
       case MediaType.Playlist:
-        return faStream
+        return faListMusic
 
       case MediaType.Album:
-        return faCompactDisc
+        return faAlbum
 
       case MediaType.Track:
         return faMusic;
