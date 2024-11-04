@@ -10,13 +10,18 @@
     --btnTrackOpenBg: rgb(60 107 149 / 50%);
 
     --trackEltHeight: 45px;
-    --trackOpenHeight: 250px;
 
     --gap: 5px;
-    --open-transiton: ease  250ms;
 
+    --trackOpenTransition: cubic-bezier(0.22, 0.61, 0.36, 1) var(--trackOpenTransitionDuration);
+    --trackOpenTransitionDuration: 250ms;
+
+    --trackOpenHeight: calc(var(--trackOpenOffsetHeight) * 1.40);
+
+    --trackOpenPadding: 10px;
+
+    transition: margin-bottom var(--trackOpenTransition);
     height: var(--trackEltHeight);
-    transition: margin-bottom var(--open-transiton);
     position: relative;
     width: 100%;
 }
@@ -87,7 +92,7 @@
     text-overflow: ellipsis;
 }
 
-.trackElt.open .trackMoreInfo {
+.trackElt.open .trackOpenInfo {
     transform: scaleY(1);
 }
 
@@ -107,17 +112,24 @@
 
 .btn {
     transition: background-color ease 250ms;
+    user-select: none;
 }
 
 .open .btn {
     background-color: var(--btnTrackOpenBg);
 }
 
-.trackMoreInfo {
+.trackOpenInfo {
     width: 100%;
-    height: var(--trackOpenHeight);
-    transform: scaleY(0);
-    transition: transform var(--open-transiton);
     background-color: var(--trackOpenBg);
     transform-origin: top;
+    
+    height: var(--trackOpenHeight);
+    transition: transform var(--trackOpenTransition);
+
+    box-sizing: border-box;
+
+    padding: var(--trackOpenPadding);
+
+    transform: scaleY(0);
 }

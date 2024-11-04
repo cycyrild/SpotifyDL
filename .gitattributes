@@ -1,1 +1,2 @@
-*.cpp linguist-vendored
+playplay/** linguist-vendored
+external_node_modules/** linguist-vendored
