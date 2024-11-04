@@ -20,8 +20,10 @@ export class FileProgressState {
     progress(): number {
         let fileProgress = 0;
         fileProgress += (this.downloadProgress / 100) * 0.7; // 70%
-        fileProgress += (this.encodingProgress / 100) * 0.25; // 25%
-        if (this.saved) fileProgress += 0.05; // 5%
+        fileProgress += (this.encodingProgress / 100) * 0.2875; // 28.75%
+        if (this.saved) {
+            fileProgress += 0.0125; // 1.25%
+        }
         return fileProgress;
     }
 

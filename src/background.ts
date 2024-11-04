@@ -1,7 +1,11 @@
+import { craftPopupUrl, parseMediaTypeAndIdFromUrl } from './utils';
+
 chrome.action.onClicked.addListener((tab) => {
     const url = tab.url;
     if (url) {
-        const popupUrl = `popup.html?url=${encodeURIComponent(url)}`;
+        const parsedUrlArgs = parseMediaTypeAndIdFromUrl(url);
+
+        const popupUrl = craftPopupUrl(parsedUrlArgs ? parsedUrlArgs[0] : '', parsedUrlArgs ? parsedUrlArgs[1] : '');
 
         chrome.windows.create({
             url: popupUrl,

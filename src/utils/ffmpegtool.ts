@@ -64,16 +64,21 @@ export class FFMPEGTool {
         if (coverFilename) {
             ffmpegArgs.push(
                 "-i", coverFilename,
-                "-map", "0", "-map", "1",
+                "-map", "0:a",
+                "-map", "1:v",
+                "-c:v", outputSettings.getEmbedCoverCodec(),
                 "-disposition:v", "attached_pic",
-                "-c:v", "copy"
             );
         } else {
             ffmpegArgs.push("-map", "0");
         }
 
+        const ffmpegAudioSettings = outputSettings.generateFFmpegString();
+        ffmpegArgs.push(...ffmpegAudioSettings.split(' '));
 
         const composer = metadata.artist_with_role.find(x => x.role === "ARTIST_ROLE_COMPOSER");
+
+        ffmpegArgs.push('-map_metadata', '-1'); // Remove original metadata from input file
 
         const metadataArgs = [
             { key: 'title', value: metadata.original_title },
@@ -81,20 +86,20 @@ export class FFMPEGTool {
             { key: 'date', value: convertToISO8601(metadata.album.date) },
             { key: 'artist', value: metadata.artist.map(x => x.name).join('; ') },
             { key: 'album_artist', value: metadata.album.artist.map(x => x.name).join('; ') },
-            { key: 'comment', value: metadata.external_id ? metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join(';') : '' },
             { key: 'disc', value: metadata.disc_number },
             { key: 'track', value: metadata.number },
             { key: 'composer', value: composer ? composer.artist_name : '' },
             { key: 'copyright', value: metadata.album.label },
             { key: 'year', value: metadata.album.date.year },
+
+            // External IDs
+            { key: 'comment', value: metadata.external_id ? metadata.external_id.map(x => `${x.type.toUpperCase()}: ${x.id}`).join(';') : '' },
         ];
 
         metadataArgs.forEach(arg => {
             ffmpegArgs.push('-metadata', `${arg.key}=${arg.value}`);
         });
 
-        const ffmpegAudioSettings = outputSettings.generateFFmpegString();
-        ffmpegArgs.push(...ffmpegAudioSettings.split(' '));
         ffmpegArgs.push(outputFilename);
 
         const handleProgress: ProgressEventCallback = (event: { progress: number; time: number }) => {
@@ -105,7 +110,6 @@ export class FFMPEGTool {
         };
 
         try {
-
             this.ffmpeg.on("progress", handleProgress);
             const error = await this.ffmpeg.exec(ffmpegArgs);
             this.ffmpeg.off("progress", handleProgress);

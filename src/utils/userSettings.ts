@@ -40,12 +40,12 @@ export function isValidSettings(settings: Settings): boolean {
 
 export const defaultSettings: Settings = {
     format: AudioFormat.OGG_VORBIS_160,
-    maxDownloadConcurrency: 5,
+    maxDownloadConcurrency: 2,
     retryOptions: {
         retries: 5,
         delay: 2500
     },
-    autoConvertToMP4AAC: false
+    autoConvertToMP4AAC: true
 };
 
 

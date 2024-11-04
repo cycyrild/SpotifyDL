@@ -1,8 +1,8 @@
 import { AudioFormat } from "../audioformats";
 
 export const AudioContainer = {
-    MP4_AUDIO: { format: 'mp4', extension: 'm4a' },
-    MATROSKA_AUDIO: { format: 'matroska', extension: 'mka' },
+    MP4_AUDIO: { format: 'mp4', extension: 'm4a', embedCoverCodec: 'copy' },
+    MATROSKA_AUDIO: { format: 'matroska', extension: 'mka', embedCoverCodec: 'copy'},
 } as const;
 
 export type AudioContainer = (typeof AudioContainer)[keyof typeof AudioContainer];
@@ -17,6 +17,10 @@ export class OutputSettings {
         this.encodingOptions = encodingOptions;
         this.container = container;
         this.bitrate = bitrate;
+    }
+
+    getEmbedCoverCodec(): string {
+        return this.container.embedCoverCodec;
     }
 
     generateFFmpegString(): string {

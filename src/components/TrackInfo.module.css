@@ -1,4 +1,49 @@
-.title 
-{
-    color: red;
+.header {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-evenly;
+    font-size: calc(var(--trackEltHeight)*.325);
+}
+
+.headerItem {
+    padding: 5px;
+    height: 25px;
+}
+/*
+.artists {
+}
+
+.trackName {
+
+}
+
+.album {
+
+}
+
+.externalIds  {
+
+}*/
+
+.album a {
+    color: inherit;
+}
+
+.iconText {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.iconText > :first-child {
+    max-width: 55px;
+    min-width: 20px;
+    width: 5%;
+}
+
+.artists .list {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
 }

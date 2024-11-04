@@ -5,6 +5,7 @@ import { UIUpdateCallback, FileProgressState } from '../utils/download-manager';
 import {SpotifyAPI} from "../spotify-api/spotify-api";
 import { TracksCommonFields, MediaType } from '../spotify-api/interfaces';
 import * as userSettings from '../utils/userSettings';
+import { MEDIA_ID_URL_ARG, MEDIA_TYPE_URL_ARG } from '../utils';
 
 const useSpotifyData = () => {
     const [tracksCommonFields, setTracksCommonFields] = useState<TracksCommonFields>();
@@ -34,28 +35,16 @@ const useSpotifyData = () => {
         setProgressDetails(progressDetails);
     }, []);
 
-    const getIdFromUrl = (url: string): [MediaType, string] | undefined => {
-        const mediaTypes = Object.values(MediaType).join('|');
-        const spotifyUrlPattern = new RegExp(`https://.*open.spotify.com.*/(${mediaTypes})/([a-zA-Z0-9]+)`);
-        const match = url.match(spotifyUrlPattern);
-    
-        if (match) {
-            const mediaType = match[1] as MediaType;
-            const id = match[2];
-            return [mediaType, id];
-        }
-    
-        return undefined;
-    };
-    
-
+  
     const fetchData = async () => {
         try {
-
             const params = new URLSearchParams(window.location.search);
-            const url = params.get('url');
-            if (!url) {
-                throw new Error("Unable to retrieve current URL.");
+
+            const mediaType = params.get(MEDIA_TYPE_URL_ARG);
+            const mediaId = params.get(MEDIA_ID_URL_ARG);
+
+            if (!mediaType || !mediaId) {
+                throw new Error(`No ${Object.values(MediaType).join(', ')} Spotify currently opened in this tab.\nPlease open one then reopen the extension.`);
             }
 
             const settings = await userSettings.loadSettings();
@@ -72,27 +61,21 @@ const useSpotifyData = () => {
 
             const downloaderLoadTask = Downloader.Create(downloadState, currentSettings, spotifyAccessToken);
 
-
-            const medias = getIdFromUrl(url);
             let tracksCommonFields: TracksCommonFields;
 
-            if (!medias) {
-                throw new Error(`No ${Object.values(MediaType).join(', ')} Spotify currently opened in this tab.\nPlease open one then reopen the extension.`);
-            }
-
-            switch (medias[0]) {
+            switch (mediaType) {
                 case MediaType.Album:
-                    tracksCommonFields = await SpotifyAPI.getAllTracksFromAlbum(medias[1], spotifyAccessToken.current);
+                    tracksCommonFields = await SpotifyAPI.getAllTracksFromAlbum(mediaId, spotifyAccessToken.current);
                     break;
                 case MediaType.Playlist:
-                    tracksCommonFields = await SpotifyAPI.getAllTracksFromPlaylist(medias[1], spotifyAccessToken.current);
+                    tracksCommonFields = await SpotifyAPI.getAllTracksFromPlaylist(mediaId, spotifyAccessToken.current);
                     break;
                 case MediaType.Track:
-                    tracksCommonFields = await SpotifyAPI.getTrack(medias[1], spotifyAccessToken.current);
+                    tracksCommonFields = await SpotifyAPI.getTrack(mediaId, spotifyAccessToken.current);
                     break;
 
                 default:
-                    throw new Error(`Unsupported media type: ${medias[0]}`);
+                    throw new Error(`Unsupported media type: ${mediaId}`);
             }
 
             downloaderRef.current = await downloaderLoadTask;

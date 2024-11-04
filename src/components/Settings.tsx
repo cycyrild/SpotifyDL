@@ -65,7 +65,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
         </div>
         <div className={style.settingsGrid}>
           <label className={style.label} htmlFor="auto-convert-mp4-aac-input">
-            Automatically convert to MP4 AAC
+            Automatically re-encode to MP4 AAC
           </label>
           <input
             id="auto-convert-mp4-aac-input"
@@ -83,7 +83,10 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ currentSettings }
 
       <div className={style.settingsInformation}>
         {
-          ((currentSettings.current.autoConvertToMP4AAC === true && AudioFormatUtil.isAAC(currentSettings.current.format)) || (currentSettings.current.autoConvertToMP4AAC === false)) ?
+          (
+            (currentSettings.current.autoConvertToMP4AAC === true && AudioFormatUtil.isAAC(currentSettings.current.format))
+            || (currentSettings.current.autoConvertToMP4AAC === false)
+          ) ?
             <>
               <span>No audio re-encoding will be performed.</span><br />
             </>

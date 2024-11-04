@@ -2,13 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import eslint from 'vite-plugin-eslint';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    eslint()
+    tsconfigPaths(),
+    ...(mode !== 'debug' ? [eslint()] : []),
   ],
   build: {
+    sourcemap: mode === 'debug',
     rollupOptions: {
       input: {
         popup: path.resolve(__dirname, 'popup.html'),
@@ -25,4 +28,4 @@ export default defineConfig({
       generateScopedName: '[name]__[local]___[hash:base64:5]',
     },
   },
-});
+}));
