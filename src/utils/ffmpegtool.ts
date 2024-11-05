@@ -2,7 +2,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { TrackMetadata } from '../spotify-api/metadata';
 import { TrackData } from "../trackdata"
 import { Mutex } from 'async-mutex';
-import { OutputSettings } from './audioOutput';
+import { OutputSettings } from './audio-output';
 import { ProgressEventCallback } from '@ffmpeg/ffmpeg/dist/esm/types';
 
 

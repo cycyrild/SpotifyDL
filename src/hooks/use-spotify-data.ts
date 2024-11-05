@@ -4,7 +4,7 @@ import { getAccessToken } from '../spotifyauth';
 import { UIUpdateCallback, FileProgressState } from '../utils/download-manager';
 import {SpotifyAPI} from "../spotify-api/spotify-api";
 import { TracksCommonFields, MediaType } from '../spotify-api/interfaces';
-import * as userSettings from '../utils/userSettings';
+import * as userSettings from '../utils/user-settings';
 import { MEDIA_ID_URL_ARG, MEDIA_TYPE_URL_ARG } from '../utils';
 
 const useSpotifyData = () => {

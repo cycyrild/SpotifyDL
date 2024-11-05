@@ -1,5 +1,5 @@
 import { SpotifyAPI } from "./spotify-api/spotify-api";
-import { RetryOptions } from "./utils/userSettings";
+import { RetryOptions } from "./utils/user-settings";
 import { Pssh } from './widevine/pssh'
 import { Cdm } from './widevine/cdm'
 import * as LicenseProtocol from './widevine/widevine';

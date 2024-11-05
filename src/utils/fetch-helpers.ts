@@ -2,7 +2,7 @@ export type ProgressCallback = (loaded: number, total: number, id: string) => vo
 
 import { Buffer } from 'buffer';
 
-import { RetryOptions } from './userSettings';
+import { RetryOptions } from './user-settings';
 
 export async function fetchWithRetry(url: string, retryOptions: RetryOptions, init?: RequestInit): Promise<Response> {
     for (let attempt = 0; attempt <= retryOptions.retries; attempt++) {

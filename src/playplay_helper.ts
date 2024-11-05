@@ -1,7 +1,7 @@
 import { Writer } from "protobufjs";
 import { Interactivity, PlayPlayLicenseRequest, ContentType, PlayPlayLicenseResponse } from "./playplay/playplay";
 import { SpotifyAPI } from "./spotify-api/spotify-api";
-import { RetryOptions } from "./utils/userSettings";
+import { RetryOptions } from "./utils/user-settings";
 import { Buffer } from "buffer";
 import { PlayPlayKey } from "./playplay/playplay-key";
 
