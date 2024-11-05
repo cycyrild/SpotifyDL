@@ -1,2 +1,3 @@
 playplay/** linguist-vendored
 external_node_modules/** linguist-vendored
+package-lock.json linguist-generated

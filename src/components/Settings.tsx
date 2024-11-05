@@ -1,7 +1,7 @@
 import React from 'react';
 import { AudioFormat, AudioFormatUtil } from '../audioformats';
-import * as userSettings from '../utils/userSettings';
-import { Settings, isValidSettings } from '../utils/userSettings';
+import * as userSettings from '../utils/user-settings';
+import { Settings, isValidSettings } from '../utils/user-settings';
 import style from './Settings.module.css';
 
 interface SettingsComponentProps {

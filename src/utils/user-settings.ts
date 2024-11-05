@@ -40,7 +40,7 @@ export function isValidSettings(settings: Settings): boolean {
 
 export const defaultSettings: Settings = {
     format: AudioFormat.OGG_VORBIS_160,
-    maxDownloadConcurrency: 2,
+    maxDownloadConcurrency: 1,
     retryOptions: {
         retries: 5,
         delay: 2500

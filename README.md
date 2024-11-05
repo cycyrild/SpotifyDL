@@ -1,4 +1,4 @@
-# SpotifyDL Chrome Extension
+# Spotify downloader Chrome extension
 
 <img src="img1.png" style="width:500px;"/>
 
