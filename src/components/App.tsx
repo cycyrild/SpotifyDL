@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faListMusic, faMusic, faArrowsRotate, faAlbum } from '@lib/pro-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { DownloadResult } from '../downloader';
-import { isUpdated } from '../utils/updateCheck';
+import { isUpdated } from '../utils/update-check';
 import { TrackObjectSimplified } from '../spotify-api/spotify-types';
 import LoadingComponent from './Loading';
 import CriticalErrorComponent from './Error';

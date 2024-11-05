@@ -3,7 +3,7 @@ import { ImageSize, TrackMetadata } from "./metadata";
 import { TrackObjectSimplified, PagingObject, PlaylistTrackObject, PlaylistObjectFull, AlbumObjectFull, TrackObjectFull } from "./spotify-types";
 import { TracksCommonFields, MediaType } from './interfaces'
 import { fetchWithRetry } from "../utils/fetch-helpers";
-import { RetryOptions } from "../utils/userSettings";
+import { RetryOptions } from "../utils/user-settings";
 const PUBLIC_API_URL: string = "https://api.spotify.com/v1";
 
 export class SpotifyAPI {

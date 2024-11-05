@@ -1,4 +1,4 @@
-import { Settings } from "./userSettings";
+import { Settings } from "./user-settings";
 
 export class DownloadQueue<T> {
     private settings: React.MutableRefObject<Settings>;

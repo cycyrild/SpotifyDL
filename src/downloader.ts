@@ -6,7 +6,7 @@ import { FFMPEGTool } from "./utils/ffmpegtool";
 import { TrackDownloadManager, UIUpdateCallback } from "./utils/download-manager";
 import { DecryptionKey, TrackData } from "./trackdata";
 import { AudioFormatUtil } from "./audioformats";
-import { Settings } from "./utils/userSettings"
+import { Settings } from "./utils/user-settings"
 import { DownloadQueue } from "./utils/download-queue"
 import { PlayPlayKey } from "./playplay/playplay-key";
 import * as PlayPlayHelper from "./playplay_helper"
@@ -14,7 +14,7 @@ import * as WidevineHelper from "./widevine_helper"
 import * as FetchHelpers from "./utils/fetch-helpers"
 import * as Metadata from "./spotify-api/metadata";
 import * as Ogg from "./audiofix/ogg"
-import { mapToMatroskaContainer, mapToMP4AAC } from "./utils/audioOutput";
+import { mapToMatroskaContainer, mapToMP4AAC } from "./utils/audio-output";
 
 const DEVICE_URL = 'device.wvd';
 
