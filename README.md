@@ -2,6 +2,10 @@
 
 <img src="img1.png" style="width:500px;"/>
 
+#
+# No longer works. Patched by Spotify (PlayPlay token banned)...
+#
+
 ## Overview
 
 **SpotifyDL** is a Chrome extension that allows users to download tracks, playlists, or albums directly from Spotify via their browser. The extension supports multiple audio formats and provides integrated decryption and metadata management.
