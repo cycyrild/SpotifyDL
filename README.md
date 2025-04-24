@@ -2,9 +2,10 @@
 
 <img src="img1.png" style="width:500px;"/>
 
-#
-# No longer works. Patched by Spotify (PlayPlay token banned)...
-#
+
+### No longer works.
+### Following a DMCA Takedown Notice from Spotify, I have been forced to remove the source code for the PlayPlay CDM.
+
 
 ## Overview
 
